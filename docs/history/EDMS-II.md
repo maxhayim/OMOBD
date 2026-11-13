@@ -20,7 +20,7 @@ the experimentation and the documented implementation is his.
 > | Label | Meaning |
 > |---|---|
 > | **Thread** | Paul said this in the thread (post linked). |
-> | **Stated** | Given to OMOBD directly (project brief relaying Paul), and not found in the thread. |
+> | **Stated** | Given to the OMOBD project directly by the repository owner, not found in the thread. |
 > | **OMOBD** | A design decision for OMOBD, not a claim about EDMS-II. |
 >
 > The thread shows photos and a video of the system, which are not
@@ -110,7 +110,7 @@ exchange (venting, lift-pump behaviour, fuel heating).
 | Bluetooth | Based on the "Arduino Basics: Bluetooth Android Processing" tutorial code. A higher baud rate made it more stable. Link is one-way only, Arduino → tablet. | [#28][p2], [#42][p3], [#95][p7], [#104][p7] |
 | Android app | Written in **Processing** (Android mode). The gauge faces are images, and the app draws needles and numbers over them. Screens: white and dark analog sets, large boost/TIT, digital readout, linear "ribbon" temperatures, raw-data debug, steampunk Nixie. Also a "connected / receiving" indicator. Each new display resolution meant redrawing every screen. | [#1][p1], [#41][p3], [#42][p3], [#44][p3], [#54][p4], [#97][p7], [#136][p10] |
 | Logging, alarms | **None** (Paul's answer in 2015). He suggested min/max values on the display instead of SD logging. | [#64][p5], [#92][p7] |
-| Source code | **Not published.** Paul called it too messy to share, and later offered only snippets or possibly the Arduino code. The brief says the source **may be lost**; nothing in the thread contradicts that. | [#48][p4], [#49][p4], [#85][p6]; Stated |
+| Source code | **Not published.** Paul called it too messy to share, and later offered only snippets or possibly the Arduino code. The source **may no longer exist**. | [#48][p4], [#49][p4], [#85][p6]; Stated |
 
 ## 5. Reliability problems reported in the thread
 
@@ -164,28 +164,23 @@ here as history only. OMOBD does **not** use them as thresholds or defaults.
 
 ## 7. Permissions and redistribution
 
-- Paul's permission (**Stated**) covers **using his work as a foundation**
-  for OMOBD.
-- It is **not** treated as permission to republish his **photos, drawings,
-  PCB files or post text**. None are in this repository; this page
-  paraphrases and links.
+- Paul has given the repository owner permission to use his previous work
+  as the foundation and starting point for OMOBD, with credit (**Stated**).
+- EDMS-II is credited throughout as Paul's work. This page paraphrases his
+  public posts and links to them.
+- **No photos, drawings or post text are copied.** If any are added later,
+  each one is credited to Paul with a link to its post, and only Paul's own
+  material is used. Other forum members' posts and photos need their own
+  permission.
 - Paul said in 2015 that he didn't want to sell EDMS-II as a product
   ([#82–#85][p6], [#86][p6], [#99][p7]). This fits OMOBD's non-commercial
-  licence. Don't sell OMOBD hardware built on his design without asking him.
-- If original files turn up (code, Fritzing/Gerber files, gauge artwork,
-  photos), get Paul's explicit written permission and preferred licence
-  before committing them, and record it in `docs/LICENSING.md`.
-- **Stated only, not in the thread:** that Paul now posts as Idahobenz, that
-  he supports an ESP32 + Wi-Fi + browser redesign, and his own view that the
-  system was not consistently reliable. The thread does document the
-  specific problems in [section 5](#5-reliability-problems-reported-in-the-thread).
+  licence.
 
 ## 8. Still open
 
-- [ ] Ask Paul whether any code, Fritzing or Gerber files, or gauge artwork survive, and on what terms they could be shared.
-- [ ] Ask Paul which photos from the thread, if any, he is happy to have reproduced here.
+- [ ] Find out whether any code, Fritzing or Gerber files or gauge artwork survive.
 - [ ] Read the linked side threads: fuel pressure gauge ([362989][fp]), MPG computer ([351581][mpg]), oil cooler bypass discussion ([368682][oil]).
-- [ ] Confirm the engine variant in Paul's car with him.
+- [ ] Confirm the engine variant in Paul's car.
 
 [p1]: https://www.peachparts.com/shopforum/diesel-discussion/350205-engine-instrumentation-project.html
 [p2]: https://www.peachparts.com/shopforum/diesel-discussion/350205-engine-instrumentation-project-2.html

@@ -6,7 +6,7 @@
 |---|---|---|
 | preOBD code, docs, tools, tests (everything inherited from upstream) | Eric Nichols and the preOBD contributors | MIT + NonCommercial ([LICENSE](../LICENSE)) |
 | OMOBD additions in this fork (`src/omobd/`, `dashboard/`, `engine-profiles/`, OMOBD docs/tests/tools, and edits to upstream files) | OMOBD contributors | Distributed under the same MIT + NonCommercial terms, because they are modifications of preOBD |
-| EDMS-II concepts | Paul (PeachParts mach4 / Idahobenz) | Used as a foundation **with his permission**. No EDMS-II files are included. |
+| EDMS-II concepts and documentation | Paul (PeachParts mach4 / Idahobenz) | Used as a foundation **with his permission**, credited throughout. No EDMS-II files or photos are included yet. |
 | PeachParts thread content (posts, photos, drawings) | Each post's author | **Not included.** Linked only. |
 
 ## What the preOBD licence allows
@@ -53,7 +53,7 @@ from the author, and record them here:
 
 | Date | Who | What was permitted | Terms | Evidence |
 |---|---|---|---|---|
-| (before 2026-11-13) | Paul (mach4 / Idahobenz) | Use previous work as foundation/starting point for a new monitoring system | Not specified | Relayed by the repository owner; link the message here when available |
+| 2026-11 | Paul (mach4 / Idahobenz) | Use of his previous work as the foundation and starting point for OMOBD, with credit | Credit to Paul | Private correspondence, held by the repository owner |
 
 ## Trademarks
 
