@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/omobd-icon.svg" alt="OMOBD diesel engine diagnostics logo" width="180"></p>
+
 <h1 align="center">OMOBD</h1>
 
 <p align="center"><b>Modern engine monitoring and virtual OBD-style diagnostics for classic Mercedes-Benz OM diesel engines.</b></p>
