@@ -1,0 +1,180 @@
+{
+  "_omobd": {
+    "profile": "OM617",
+    "board": "esp32s3_omobd",
+    "note": "OM617.95x turbo. EGT probe pre-turbine. MAP and vacuum sensors are 5 V parts behind 2.2k/3.3k dividers (divider 0.6). Battery divider 47k/10k. RPM needs calibration (docs/calibration/RPM_CALIBRATION.md). Optional inputs ship disabled.",
+    "alarms": "No rules are included on purpose. Add alarm rules only with limits validated for your engine (docs/calibration/ALARM_THRESHOLDS.md)."
+  },
+  "schemaVersion": 1,
+  "mode": "runtime",
+  "inputs": [
+    {
+      "idx": 0,
+      "pin": 1,
+      "pinLabel": "A0",
+      "abbr": "ECT",
+      "name": "Coolant Temperature",
+      "app": "COOLANT_TEMP",
+      "sensor": "VDO_120C_TABLE",
+      "units": "CELSIUS",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15
+    },
+    {
+      "idx": 1,
+      "pin": 2,
+      "pinLabel": "A1",
+      "abbr": "OIL",
+      "name": "Oil Temperature",
+      "app": "OIL_TEMP",
+      "sensor": "VDO_150C_TABLE",
+      "units": "CELSIUS",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15
+    },
+    {
+      "idx": 2,
+      "pin": 3,
+      "pinLabel": "A2",
+      "abbr": "OILP",
+      "name": "Oil Pressure",
+      "app": "OIL_PRESSURE",
+      "sensor": "VDO_5BAR_TABLE",
+      "units": "BAR",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15
+    },
+    {
+      "idx": 3,
+      "pin": 4,
+      "pinLabel": "A3",
+      "abbr": "MAP",
+      "name": "Intake Manifold (absolute)",
+      "app": "MAP_PRESSURE",
+      "sensor": "MPX4250AP",
+      "units": "BAR",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15,
+      "divider": 0.6
+    },
+    {
+      "idx": 4,
+      "pin": 5,
+      "pinLabel": "A4",
+      "abbr": "VAC",
+      "name": "Vacuum System (absolute)",
+      "app": "VACUUM",
+      "sensor": "MPX4250AP",
+      "units": "BAR",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15,
+      "divider": 0.6
+    },
+    {
+      "idx": 5,
+      "pin": 6,
+      "pinLabel": "A5",
+      "abbr": "BATT",
+      "name": "Battery Voltage",
+      "app": "PRIMARY_BATTERY",
+      "sensor": "VOLTAGE_DIVIDER",
+      "units": "VOLTS",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15,
+      "calibration": {
+        "type": "VOLTAGE_DIVIDER",
+        "source": "CUSTOM",
+        "params": {
+          "r1": 47000,
+          "r2": 10000,
+          "correction": 1.0,
+          "offset": 0.0
+        }
+      }
+    },
+    {
+      "idx": 6,
+      "pin": 7,
+      "pinLabel": "A6",
+      "abbr": "TRANS",
+      "name": "Transmission Temperature",
+      "app": "TRANS_TEMP",
+      "sensor": "VDO_150C_TABLE",
+      "units": "CELSIUS",
+      "enabled": false,
+      "displayEnabled": false,
+      "outputMask": 15
+    },
+    {
+      "idx": 7,
+      "pin": 8,
+      "pinLabel": "A7",
+      "abbr": "IAT",
+      "name": "Intake Air Temperature",
+      "app": "INTAKE_AIR_TEMP",
+      "sensor": "BOSCH_NTC_M12",
+      "units": "CELSIUS",
+      "enabled": false,
+      "displayEnabled": false,
+      "outputMask": 15
+    },
+    {
+      "idx": 8,
+      "pin": 9,
+      "pinLabel": "A8",
+      "abbr": "FUEL",
+      "name": "Fuel Supply Pressure",
+      "app": "FUEL_PRESSURE",
+      "sensor": "GENERIC_BOOST",
+      "units": "BAR",
+      "enabled": false,
+      "displayEnabled": false,
+      "outputMask": 15,
+      "divider": 0.6
+    },
+    {
+      "idx": 9,
+      "pin": 10,
+      "pinLabel": "A9",
+      "abbr": "BAY",
+      "name": "Engine Compartment Temp",
+      "app": "ENGINE_BAY_TEMP",
+      "sensor": "GENERIC_NTC_BETA",
+      "units": "CELSIUS",
+      "enabled": false,
+      "displayEnabled": false,
+      "outputMask": 15
+    },
+    {
+      "idx": 10,
+      "pin": 14,
+      "abbr": "EGT",
+      "name": "Exhaust Gas Temp (pre-turbo)",
+      "app": "EGT",
+      "sensor": "MAX31855",
+      "units": "CELSIUS",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15
+    },
+    {
+      "idx": 11,
+      "pin": 15,
+      "abbr": "RPM",
+      "name": "Engine RPM",
+      "app": "ENGINE_RPM",
+      "sensor": "W_PHASE_RPM",
+      "units": "RPM",
+      "enabled": true,
+      "displayEnabled": true,
+      "outputMask": 15
+    }
+  ],
+  "rules": []
+}

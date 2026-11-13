@@ -1,0 +1,237 @@
+{
+  "profileSchema": 1,
+  "id": "OM617",
+  "name": "Mercedes-Benz OM617 3.0 L inline-5 diesel",
+  "status": "development",
+  "statusNote": "Primary OMOBD development engine. Firmware support exists for every capability marked 'proposed'; none has been validated on a running OM617 yet.",
+  "identification": {
+    "verified": false,
+    "source": "General reference knowledge; not checked against Mercedes-Benz documentation in this repository. Confirm with the engine number stamped on the block and the factory service manual.",
+    "cylinders": 5,
+    "displacementLitres": 3.0,
+    "combustion": "indirect injection (pre-chamber)",
+    "injection": "mechanical",
+    "injectionNote": "Bosch inline injection pump with mechanical governor. There is no engine ECU and no factory OBD system: OMOBD's OBD-style PIDs are synthetic.",
+    "factoryEcu": false
+  },
+  "variants": [
+    {
+      "id": "OM617.912",
+      "aspiration": "naturally_aspirated",
+      "label": "OM617.912 (naturally aspirated)",
+      "verified": false,
+      "config": "configs/esp32s3-om617-na.preobd.json",
+      "settings": "configs/esp32s3-om617-na.omobd-settings.json"
+    },
+    {
+      "id": "OM617.95x",
+      "aspiration": "turbocharged",
+      "label": "OM617.95x Turbo Diesel",
+      "verified": false,
+      "variantNote": "Turbo variants are commonly listed as OM617.950, .951 and .952 for different chassis. Use your stamped number.",
+      "config": "configs/esp32s3-om617-turbo.preobd.json",
+      "settings": "configs/esp32s3-om617-turbo.omobd-settings.json"
+    }
+  ],
+  "capabilities": {
+    "egt": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "EGT",
+      "sensors": ["MAX31855", "MAX6675"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "K-type probe in the exhaust manifold collector ahead of the turbine (turbo) or in the manifold outlet (NA). MAX31855 preferred: MAX6675 has a lower ceiling and no fault detail."
+    },
+    "boost": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "MAP_PRESSURE",
+      "derived": "boost",
+      "sensors": ["MPX4250AP", "MPX5700AP"],
+      "appliesTo": ["turbocharged"],
+      "note": "Absolute MAP sensor teed into the intake manifold. Boost is CALCULATED as MAP minus the atmospheric reference."
+    },
+    "vacuum": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "VACUUM",
+      "derived": "vacuum",
+      "sensors": ["MPX4250AP"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Absolute sensor teed into the vacuum system (pump outlet, reservoir, or an actuator line). Vacuum depth is calculated from the atmospheric reference. A 15-115 kPa sensor would give better resolution but is not yet in preOBD's library."
+    },
+    "coolantTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "COOLANT_TEMP",
+      "sensors": ["VDO_120C_TABLE", "VDO_120C_STEINHART", "BOSCH_NTC_M12", "GENERIC_NTC_BETA"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Use a separate, immersed sender. Do not share the factory gauge sender: two loads on one sender change both readings. The factory sender's resistance curve is not characterised in this repository."
+    },
+    "oilTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "OIL_TEMP",
+      "sensors": ["VDO_150C_TABLE", "VDO_150C_STEINHART", "GENERIC_NTC_BETA"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Immersed sender via a sandwich adapter at the oil filter or a drilled/tapped drain plug. Surface-mounted probes read low and lag; see docs/hardware/SENSOR_COMPATIBILITY.md."
+    },
+    "transTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "TRANS_TEMP",
+      "sensors": ["VDO_150C_TABLE", "GENERIC_NTC_BETA"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Optional. Fitting depends on the transmission (factory Mercedes automatic, or the conversion's transmission)."
+    },
+    "intakeAirTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "INTAKE_AIR_TEMP",
+      "sensors": ["BOSCH_NTC_M12", "GENERIC_NTC_BETA"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"]
+    },
+    "engineBayTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "ENGINE_BAY_TEMP",
+      "sensors": ["GENERIC_NTC_BETA", "GENERIC_TEMP_LINEAR"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"]
+    },
+    "oilPressure": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "OIL_PRESSURE",
+      "sensors": ["VDO_5BAR_TABLE", "VDO_10BAR_TABLE", "GENERIC_PRESSURE_150PSI"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Add a sender on a tee; keep the factory gauge line. RPM-dependent low-pressure advisory available once you enter a validated curve."
+    },
+    "fuelPressure": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "FUEL_PRESSURE",
+      "sensors": ["GENERIC_BOOST", "GENERIC_PRESSURE_150PSI"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Low-pressure supply side only (lift pump to injection pump). NEVER connect a sensor to the high-pressure injection lines."
+    },
+    "rpm": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "ENGINE_RPM",
+      "sensors": ["W_PHASE_RPM"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"]
+    },
+    "batteryVoltage": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "PRIMARY_BATTERY",
+      "sensors": ["VOLTAGE_DIVIDER"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"]
+    },
+    "engineHours": {
+      "status": "proposed",
+      "firmware": "available",
+      "derived": "engineHours",
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Calculated: time with measured RPM at or above the running threshold. Needs an RPM input."
+    },
+    "vehicleSpeed": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "VEHICLE_SPEED",
+      "sensors": ["HALL_SPEED"],
+      "appliesTo": ["naturally_aspirated", "turbocharged"],
+      "note": "Depends on the vehicle, not the engine. Factory Mercedes speedometers of this era are often cable driven: a hall sensor or a transmission/transfer-case VSS is needed."
+    },
+    "fuelFlow": {
+      "status": "unsupported",
+      "firmware": "missing",
+      "appliesTo": [],
+      "note": "Not implemented. Diesel return flow makes a single flow meter wrong: supply and return must both be measured. Any consumption figure would be an ESTIMATE and must be labelled as such."
+    },
+    "factoryEcuDiagnostics": {
+      "status": "unsupported",
+      "firmware": "missing",
+      "appliesTo": [],
+      "note": "The OM617 has no ECU. OMOBD never reports ECU fault codes for it."
+    }
+  },
+  "rpmSources": [
+    {
+      "id": "ALTERNATOR_W",
+      "status": "proposed",
+      "sensor": "W_PHASE_RPM",
+      "note": "Alternator W (phase) terminal through a conditioning circuit (docs/hardware/SIGNAL_CONDITIONING.md). Calibrate pole count and pulley ratio against a known tachometer. Not every alternator has a W terminal."
+    },
+    {
+      "id": "FACTORY_TACH_SIGNAL",
+      "status": "unverified",
+      "sensor": "W_PHASE_RPM",
+      "note": "Where a factory tachometer is fitted, its signal source and pulses per revolution vary by chassis and year and are not documented here. Measure the signal with an oscilloscope before connecting anything."
+    },
+    {
+      "id": "CRANK_OR_FLYWHEEL_PICKUP",
+      "status": "proposed",
+      "sensor": "W_PHASE_RPM",
+      "note": "A magnetic (VR) pickup needs a VR interface IC; a hall sensor needs only level shifting. Set pulses per revolution from the trigger tooth count."
+    }
+  ],
+  "thresholds": {
+    "_note": "Every value is null until validated for YOUR engine. OMOBD's configs ship with no alarm rules: preOBD's generic preset limits are not OM617 specifications.",
+    "egtPreTurboMaxC":       {"value": null, "status": "unconfigured", "source": null},
+    "egtNaMaxC":             {"value": null, "status": "unconfigured", "source": null},
+    "boostMaxBar":           {"value": null, "status": "unconfigured", "source": null, "note": "Depends on turbo, wastegate and ALDA settings."},
+    "coolantMaxC":           {"value": null, "status": "unconfigured", "source": null},
+    "oilTempMaxC":           {"value": null, "status": "unconfigured", "source": null},
+    "oilPressureCurve":      {"value": null, "status": "unconfigured", "source": null, "note": "Enter rpm/minBar points from the service manual into OMOBD settings (oilCurve)."},
+    "batteryLowV":           {"value": null, "status": "unconfigured", "source": null},
+    "chargingHighV":         {"value": null, "status": "unconfigured", "source": null},
+    "vacuumMinInHg":         {"value": null, "status": "unconfigured", "source": null}
+  },
+  "units": {
+    "temperature": "CELSIUS",
+    "pressure": "BAR",
+    "vacuum": "inHg",
+    "speed": "KPH"
+  },
+  "hardware": {
+    "board": "esp32s3_omobd",
+    "interfaces": [
+      {"id": "SPI", "for": "MAX31855 thermocouple amplifier"},
+      {"id": "ADC1 x 10", "for": "resistive senders (with bias resistors) and 0.5-4.5 V sensors (with dividers)"},
+      {"id": "Digital interrupt", "for": "RPM (conditioned) and vehicle speed"},
+      {"id": "12 V supply", "for": "fused, ignition-switched, automotive buck converter with reverse and transient protection"}
+    ]
+  },
+  "dashboard": {
+    "pages": [
+      {
+        "title": "Engine",
+        "widgets": [
+          {"key": "ENGINE_RPM", "type": "dial", "size": 2},
+          {"key": "EGT", "type": "dial", "size": 2},
+          {"key": "derived.boost", "type": "dial", "size": 1, "variants": ["turbocharged"]},
+          {"key": "OIL_PRESSURE", "type": "dial", "size": 1},
+          {"key": "COOLANT_TEMP", "type": "bar", "size": 1},
+          {"key": "OIL_TEMP", "type": "bar", "size": 1}
+        ]
+      },
+      {
+        "title": "Systems",
+        "widgets": [
+          {"key": "PRIMARY_BATTERY", "type": "number", "size": 1},
+          {"key": "derived.vacuum", "type": "dial", "size": 1},
+          {"key": "FUEL_PRESSURE", "type": "number", "size": 1},
+          {"key": "TRANS_TEMP", "type": "bar", "size": 1},
+          {"key": "INTAKE_AIR_TEMP", "type": "number", "size": 1},
+          {"key": "ENGINE_BAY_TEMP", "type": "number", "size": 1},
+          {"key": "derived.engineHours", "type": "number", "size": 1}
+        ]
+      }
+    ]
+  },
+  "installation": {
+    "factoryMercedes": "docs/installation/OM617_INSTALLATION.md",
+    "conversion": "docs/installation/OM617_JEEP_CONVERSION.md"
+  }
+}

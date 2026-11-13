@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "wifi": {
+    "mode": "AP"
+  },
+  "atmosphere": {
+    "source": "FIXED",
+    "fixedBar": 1.01325,
+    "inputPin": null
+  },
+  "oilCurve": {
+    "points": [],
+    "warmupMs": 10000,
+    "debounceMs": 2000
+  },
+  "runningRpm": 300,
+  "livePollMs": 500,
+  "historyIntervalMs": 1000,
+  "profileId": "OM617.95x",
+  "pins": {
+    "boostMap": 4,
+    "vacuumMap": 5,
+    "rpm": 15,
+    "oilPressure": 3
+  }
+}

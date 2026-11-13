@@ -1,0 +1,195 @@
+{
+  "profileSchema": 1,
+  "id": "OM601",
+  "name": "Mercedes-Benz OM601 inline-4 diesel",
+  "status": "planned",
+  "statusNote": "Planned profile. Nothing engine-specific has been checked on this engine. Sensor capabilities below are what OMOBD firmware can measure, not what has been fitted to this engine.",
+  "identification": {
+    "verified": false,
+    "source": "General reference knowledge; not checked against Mercedes-Benz documentation. Confirm variant, injection system and electrical system for your engine.",
+    "cylinders": 4,
+    "displacementLitres": "approx. 2.0-2.3",
+    "injection": "mechanical",
+    "injectionNote": "Two-valve pre-chamber diesel; mechanical inline pump.",
+    "factoryEcu": false
+  },
+  "variants": [
+    {
+      "id": "OM601.xxx",
+      "aspiration": "naturally_aspirated",
+      "label": "OM601 (naturally aspirated)",
+      "verified": false
+    }
+  ],
+  "capabilities": {
+    "egt": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "EGT",
+      "sensors": [
+        "MAX31855"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "boost": {
+      "status": "unsupported",
+      "firmware": "available",
+      "app": "MAP_PRESSURE",
+      "sensors": [
+        "MPX4250AP"
+      ],
+      "note": "No turbocharger on this engine family.",
+      "appliesTo": []
+    },
+    "vacuum": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "VACUUM",
+      "sensors": [
+        "MPX4250AP"
+      ],
+      "derived": "vacuum",
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "coolantTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "COOLANT_TEMP",
+      "sensors": [
+        "VDO_120C_TABLE",
+        "GENERIC_NTC_BETA"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "oilTemp": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "OIL_TEMP",
+      "sensors": [
+        "VDO_150C_TABLE",
+        "GENERIC_NTC_BETA"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "oilPressure": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "OIL_PRESSURE",
+      "sensors": [
+        "VDO_5BAR_TABLE",
+        "GENERIC_PRESSURE_150PSI"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "fuelPressure": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "FUEL_PRESSURE",
+      "sensors": [
+        "GENERIC_BOOST"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "rpm": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "ENGINE_RPM",
+      "sensors": [
+        "W_PHASE_RPM"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "batteryVoltage": {
+      "status": "proposed",
+      "firmware": "available",
+      "app": "PRIMARY_BATTERY",
+      "sensors": [
+        "VOLTAGE_DIVIDER"
+      ],
+      "appliesTo": [
+        "naturally_aspirated"
+      ]
+    },
+    "factoryEcuDiagnostics": {
+      "status": "unsupported",
+      "firmware": "missing",
+      "appliesTo": [],
+      "note": "OMOBD does not read or emulate any factory control unit. Where one exists, use a proper diagnostic tool for it."
+    }
+  },
+  "rpmSources": [
+    {
+      "id": "ALTERNATOR_W",
+      "status": "proposed",
+      "sensor": "W_PHASE_RPM",
+      "note": "Only if the alternator has a W terminal; calibrate against a known tachometer."
+    },
+    {
+      "id": "FACTORY_SIGNAL",
+      "status": "unverified",
+      "sensor": "W_PHASE_RPM",
+      "note": "Factory speed signals differ by variant and may belong to a control unit. Measure before connecting; never load a control unit's sensor line."
+    }
+  ],
+  "thresholds": {
+    "_note": "All unconfigured until validated for this engine.",
+    "egtMaxC": {
+      "value": null,
+      "status": "unconfigured",
+      "source": null
+    },
+    "coolantMaxC": {
+      "value": null,
+      "status": "unconfigured",
+      "source": null
+    },
+    "oilPressureCurve": {
+      "value": null,
+      "status": "unconfigured",
+      "source": null
+    }
+  },
+  "units": {
+    "temperature": "CELSIUS",
+    "pressure": "BAR",
+    "vacuum": "inHg",
+    "speed": "KPH"
+  },
+  "hardware": {
+    "board": "esp32s3_omobd",
+    "interfaces": [
+      {
+        "id": "SPI",
+        "for": "thermocouple amplifier"
+      },
+      {
+        "id": "ADC1",
+        "for": "senders and 0.5-4.5 V sensors"
+      },
+      {
+        "id": "Digital interrupt",
+        "for": "RPM"
+      }
+    ]
+  },
+  "dashboard": {
+    "inherit": "OM617"
+  },
+  "installation": {
+    "note": "No engine-specific guide yet. The OM617 guide's general sections (power, grounding, signal conditioning) apply."
+  }
+}
