@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OMOBD diesel engine diagnostics icon">
+ <defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#202b35"/><stop offset="1" stop-color="#09121c"/></linearGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f4f7f8"/><stop offset="1" stop-color="#93aabb"/></linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#36e1d4"/><stop offset="1" stop-color="#43a5f5"/></linearGradient>
+ </defs>
+ <rect x="12" y="12" width="488" height="488" rx="108" fill="url(#bg)"/>
+ <rect x="27" y="27" width="458" height="458" rx="92" fill="none" stroke="#5f7d8c" stroke-width="3" opacity=".6"/>
+ <g fill="none" stroke="url(#metal)" stroke-linejoin="round" stroke-linecap="round">
+   <path d="M114 207h278v112H114z" stroke-width="16"/>
+   <path d="M135 207v-26h46v26m6 0v-26h46v26m6 0v-26h46v26m6 0v-26h46v26m6 0v-26h35v26" stroke-width="11"/>
+   <path d="M114 240H87v48h27M392 237h28v50h-28M155 319v24h196v-24" stroke-width="13"/>
+ </g>
+ <g stroke="#a7bcc7" stroke-width="6" opacity=".7">
+   <path d="M160 227v72m48-72v72m48-72v72m48-72v72m48-72v72"/>
+ </g>
+ <path d="M84 267h92l19-29 23 57 29-83 28 77 21-33 14 11h115" fill="none" stroke="#061a22" stroke-width="17" stroke-linejoin="round" stroke-linecap="round"/>
+ <path d="M84 267h92l19-29 23 57 29-83 28 77 21-33 14 11h115" fill="none" stroke="url(#cyan)" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+ <text x="256" y="414" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-size="67" font-weight="800" letter-spacing="1" fill="#f5f8fb">OMOBD</text>
+ <rect x="176" y="436" width="160" height="5" rx="2.5" fill="#3bd4df"/>
+</svg>
