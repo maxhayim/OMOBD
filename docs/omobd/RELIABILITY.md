@@ -1,6 +1,9 @@
 # Reliability design
 
-EDMS-II worked but was not consistently reliable ([history](../history/EDMS-II.md)).
+EDMS-II worked but was not consistently reliable. Its documented problems
+(Bluetooth reconnects, malformed packets, a failing 1-Wire bus, water in
+the engine-bay box) are listed in the
+[history](../history/EDMS-II.md#5-reliability-problems-reported-in-the-thread).
 This is how each reliability requirement is handled in OMOBD, and how
 it's checked. "preOBD" means the behaviour is inherited unchanged.
 

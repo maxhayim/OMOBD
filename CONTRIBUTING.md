@@ -12,10 +12,10 @@ MIT + NonCommercial terms ([docs/LICENSING.md](docs/LICENSING.md)).
 2. **Sourced engine data** — factory specifications with the document they
    came from (manual title, section, page). Unsourced numbers can't be
    accepted into profiles.
-3. **EDMS-II research** — work through the PeachParts thread using the
-   [checklist](docs/history/EDMS-II.md#6-research-checklist-to-complete-from-the-thread);
-   link every fact to its post. Don't upload Paul's images or files without
-   his written permission.
+3. **EDMS-II history** — corrections or additions to
+   [the history page](docs/history/EDMS-II.md#8-still-open), each linked to
+   its forum post. Don't upload Paul's images or files without his written
+   permission.
 4. Bench results on ESP32-S3 boards and phones/browsers.
 
 ## Ground rules

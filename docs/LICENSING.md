@@ -46,7 +46,8 @@ from the author, and record them here:
 
 - [ ] Original source code (Arduino sketch, Processing app), if recovered
 - [ ] Schematics and PCB files
-- [ ] Photographs and illustrations from the PeachParts thread
+- [ ] Photographs, gauge artwork and illustrations from the PeachParts thread
+      (the history page paraphrases posts and links to them; nothing is copied)
 - [ ] Quoted measurements or text beyond short attributed quotations
 - [ ] Material from anyone else who posted in the thread
 

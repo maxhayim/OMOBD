@@ -10,7 +10,7 @@
 - [x] OM617 profile (NA + turbo) with importable ESP32-S3 configs; planned profiles OM615/616/601–606
 - [x] Profile validator; host tests for every OMOBD module; profile import through preOBD's importer
 - [x] Installation (factory + Jeep), hardware, calibration, testing and history docs
-- [ ] EDMS-II thread research ([checklist](docs/history/EDMS-II.md#6-research-checklist-to-complete-from-the-thread))
+- [x] EDMS-II history from the full PeachParts thread ([history](docs/history/EDMS-II.md); [open items](docs/history/EDMS-II.md#8-still-open))
 
 ## Milestone 2 — hardware validation
 
@@ -23,7 +23,7 @@
 
 ## Milestone 3 — sensors and data
 
-- [ ] DS18B20 (1-Wire) temperature driver, non-blocking conversion, upstream-compatible
+- [ ] DS18B20 (1-Wire) temperature driver, non-blocking conversion, upstream-compatible (EDMS-II's main temperature sensor)
 - [ ] 15–115 kPa absolute sensor in the library for vacuum resolution
 - [ ] Optional: fuel supply + return flow measurement → consumption **estimate**, labelled as such
 - [ ] Device-side long-term statistics (max EGT, max boost per drive)

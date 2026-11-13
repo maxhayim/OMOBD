@@ -123,8 +123,8 @@ preOBD core is reused rather than duplicated. Details:
 - **No hardware validation yet.** The firmware builds and the host tests pass;
   nothing has been run on an OM617. See
   [Hardware validation status](docs/testing/HARDWARE_VALIDATION_STATUS.md).
-- The EDMS-II history page is incomplete: the forum thread could not be read
-  when it was written ([EDMS-II](docs/history/EDMS-II.md)).
+- EDMS-II's original code and PCB files are not available; the
+  [history page](docs/history/EDMS-II.md) is reconstructed from Paul's forum posts.
 - No engine thresholds are supplied; every warning limit is yours to set.
 - DS18B20 sensors and fuel-flow measurement are not supported yet
   ([Roadmap](ROADMAP.md)).
@@ -148,8 +148,8 @@ without written permission from the preOBD copyright holder. OMOBD is not
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Especially wanted: verified OM engine
-data (with sources), installation reports, and EDMS-II research from the
-PeachParts thread.
+data (with sources), installation reports, and anything that helps recover
+EDMS-II material (with Paul's permission).
 
 ## Related Projects
 
