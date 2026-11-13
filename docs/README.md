@@ -13,6 +13,19 @@ Something not working? [Troubleshooting](TROUBLESHOOTING.md).
 
 ---
 
+## OMOBD (Mercedes-Benz OM diesel)
+
+OMOBD-specific documentation. Everything else on this page is preOBD's and applies unchanged.
+
+- **Engines:** [Engine compatibility matrix](om-engines/ENGINE_COMPATIBILITY.md) · [Engine profiles](../engine-profiles/README.md)
+- **History:** [EDMS-II](history/EDMS-II.md) — Paul's original engine instrumentation project
+- **Hardware:** [Requirements](hardware/HARDWARE_REQUIREMENTS.md) · [Signal conditioning](hardware/SIGNAL_CONDITIONING.md) · [Sensor compatibility matrix](hardware/SENSOR_COMPATIBILITY.md)
+- **Installation:** [OM617 (factory Mercedes)](installation/OM617_INSTALLATION.md) · [OM617 in a Jeep](installation/OM617_JEEP_CONVERSION.md)
+- **Calibration:** [Sensors](calibration/SENSOR_CALIBRATION.md) · [RPM](calibration/RPM_CALIBRATION.md) · [Alarm thresholds](calibration/ALARM_THRESHOLDS.md)
+- **Testing:** [Bench](testing/BENCH_TESTING.md) · [Vehicle](testing/VEHICLE_TESTING.md) · [Hardware validation status](testing/HARDWARE_VALIDATION_STATUS.md)
+- **Software:** [Web dashboard and API](omobd/WEB_DASHBOARD.md) · [Virtual OBD](omobd/VIRTUAL_OBD.md) · [Reliability](omobd/RELIABILITY.md) · [Development](omobd/DEVELOPMENT.md) · [Troubleshooting](omobd/TROUBLESHOOTING.md)
+- **Licensing:** [Licensing and attribution](LICENSING.md)
+
 ## How preOBD Works
 
 Each **input** is a sensor on a pin, configured with two names:

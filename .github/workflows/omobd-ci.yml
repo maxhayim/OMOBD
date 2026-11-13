@@ -1,0 +1,60 @@
+# OMOBD CI: engine-profile validation, host unit tests and the ESP32-S3 build.
+# Host tests run on macOS because test/ links with ld64's -dead_strip
+# (platformio.ini [env:native]), which is how upstream preOBD runs them.
+name: OMOBD CI
+
+on:
+  push:
+    branches: ["main", "omobd-dev"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate engine profiles against the firmware registries
+        run: python3 tools/omobd/validate_profiles.py
+      - name: Profile validator unit tests
+        run: python3 -m unittest discover -s tools/omobd -v
+      - name: Registry consistency (upstream tool)
+        run: python3 tools/validate_registries.py --ci
+      - name: Layering ratchet (upstream tool)
+        run: python3 tools/check_layering.py
+      - name: Dashboard embed is up to date
+        run: |
+          python3 scripts/omobd_embed_dashboard.py
+          git diff --exit-code src/omobd/dashboard_html.h
+
+  native-tests:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install platformio
+      - name: Host unit tests (upstream preOBD + OMOBD)
+        run: pio test -e native
+
+  build-esp32s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install platformio
+      - name: Build OMOBD firmware (ESP32-S3)
+        run: pio run -e esp32s3_omobd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omobd-esp32s3-firmware
+          path: |
+            .pio/build/esp32s3_omobd/firmware.bin
+            .pio/build/esp32s3_omobd/bootloader.bin
+            .pio/build/esp32s3_omobd/partitions.bin

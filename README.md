@@ -1,136 +1,168 @@
-# preOBD - Open Source Engine Monitoring System
+<h1 align="center">OMOBD</h1>
 
-**⚠️ BETA SOFTWARE** - See [DISCLAIMER](DISCLAIMER.md) for important safety information.
+<p align="center"><b>Modern engine monitoring and virtual OBD-style diagnostics for classic Mercedes-Benz OM diesel engines.</b></p>
 
-Open-source engine monitoring for classic cars and other vehicles without OBD-II
-diagnostics.
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT + NonCommercial" src="https://img.shields.io/badge/license-MIT%20%2B%20NonCommercial-blue"></a>
+  <img alt="Status: development" src="https://img.shields.io/badge/status-development-orange">
+  <img alt="Platform: ESP32-S3" src="https://img.shields.io/badge/platform-ESP32--S3-informational">
+  <a href="https://github.com/preobd/preOBD"><img alt="Fork of preOBD" src="https://img.shields.io/badge/fork%20of-preOBD-lightgrey"></a>
+</p>
 
----
+OMOBD watches an OM617 (and, later, its OM-family relatives) the way a
+modern engine is watched: exhaust gas temperature, boost, vacuum, oil
+pressure and temperatures, coolant, RPM and charging voltage, shown live in
+any phone or tablet browser over the unit's own Wi-Fi, with history graphs,
+alarms and logging. It runs with no internet connection.
 
-## What is preOBD?
+OMOBD is a fork of **[preOBD](https://github.com/preobd/preOBD)** by Eric
+Nichols and the preOBD contributors, and it continues the **EDMS-II** engine
+instrumentation project by **Paul (PeachParts: mach4 / Idahobenz)**. See
+[Acknowledgments](#acknowledgments).
 
-preOBD reads the temperature, pressure, voltage, RPM and speed senders a classic
-car already has — or new ones you fit — and makes the readings available on a
-dash LCD, in OBD-II phone apps, in RealDash, and in SD-card logs. It can sound
-alarms and switch relays for fans and pumps. It runs on a Teensy, ESP32-S3,
-Feather STM32F405 or Arduino Mega and is configured by typing commands over USB.
+> **Monitoring only.** OMOBD never controls fuel, starting, shutdown or any
+> other engine function, and it adds nothing to the factory gauges' circuits.
+> Keep your mechanical gauges as the primary instruments. Read the
+> [DISCLAIMER](DISCLAIMER.md).
 
-**What it does:**
-- Reads temperature (thermocouples, VDO/Smiths/Stewart-Warner/AC Delco/Bosch/Jeep senders, NTC thermistors, 0.5–4.5V sensors)
-- Reads pressure (resistive senders, 0.5–4.5V sensors, MAP sensors), fuel level and throttle position
-- Reads battery voltage, engine RPM (from the alternator W terminal) and vehicle speed (hall-effect sensors)
-- Reads ambient temperature, pressure and humidity (BME280)
-- Imports OBD-II PIDs from a modern ECU on the CAN bus — mix classic gauges with an engine swap's data
-- Shows readings on a 20×4 LCD
-- Answers OBD-II requests over CAN, so ELM327 adapters and apps such as Torque and OBD Fusion work
-- Emulates an ELM327 over Bluetooth LE, so OBD-II apps can connect with no adapter
-- Streams to RealDash
-- Logs to an SD card or the serial port
-- Sounds alarms and switches 12V relays (cooling fans, pumps, warning lights)
-- Can also be configured and monitored from a browser over Bluetooth, with the [Web Bluetooth page](https://preobd.github.io/preOBD/)
+<h2>Screenshots</h2>
 
-**What it doesn't do:**
-- Engine control (monitoring only; relay outputs are auxiliary)
-- Provide safety certification or guarantees
+No screenshots yet: they will be added from a real OM617 installation, not
+mock-ups. The dashboard is `dashboard/index.html`.
 
----
+## Features
 
-## Getting Started
+**From preOBD (reused, unchanged):**
+- Sensor drivers: K-type thermocouples (MAX31855, MAX6675), VDO/Bosch/generic
+  NTC senders, 0.5–4.5 V pressure sensors, MPX MAP sensors, resistive pressure
+  senders, battery voltage, alternator W-terminal RPM, hall-effect speed, BME280
+- Per-input calibration, alarm rules with warning tier, warm-up and debounce
+- OBD-II answers over CAN (ELM327 adapters, Torque, OBD Fusion), ELM327
+  emulation over Bluetooth LE, RealDash streaming, SD-card and serial logging
+- Configuration over USB serial, JSON export/import, EEPROM storage, watchdog
+- Runs on ESP32-S3, Teensy 4.x/3.6, Feather STM32F405, Arduino Mega 2560
 
-1. **[Choose your hardware](docs/getting-started/CHOOSING_HARDWARE.md)** — a Teensy 4.1 is recommended
-2. **[Getting Started](docs/getting-started/GETTING_STARTED.md)** — install the tools, flash the board and get your first reading on the bench, in about an hour
-3. Find your senders in the **[Sensor Selection Guide](docs/guides/sensor-types/SENSOR_SELECTION_GUIDE.md)** and wire them up
+**Added by OMOBD:**
+- **Wi-Fi web dashboard** served by the ESP32-S3 itself — phone, tablet or desktop;
+  dial/bar/number gauges you can add, remove, resize and reorder across pages;
+  history graphs; alarm and sensor-status indicators; logging control;
+  configuration backups. No app, no cloud.
+- **Engine profiles** (`engine-profiles/`): OM617 (naturally aspirated and
+  turbo) with ready-to-import sensor configs; planned profiles for OM615,
+  OM616, OM601, OM602, OM603, OM604, OM605 and OM606
+- **Calculated values, always labelled as calculated:** boost (MAP − atmosphere),
+  vacuum depth, engine hours, with a configurable atmospheric reference
+  (fixed, barometer input, or captured at key-on)
+- **RPM-dependent low oil pressure advisory** — off until you enter a validated curve
+- New preOBD applications `VACUUM` and `ENGINE_BAY_TEMP` (OBD-style PIDs 0xB8/0xB9)
+- Reliability work: sensor-fault and out-of-range detection shown as such
+  (never as 0), stale-connection banner, validated settings with safe
+  fallback, Wi-Fi supervision with fallback access point
+- ESP32 watchdog builds on both Arduino-ESP32 2.x and 3.x
 
-Configuration is a few commands over USB:
+## Requirements
+
+- ESP32-S3 development board (ESP32-S3-DevKitC-1 N8R8 or similar)
+- Sensors and signal conditioning for what you want to measure — see
+  [Hardware requirements](docs/hardware/HARDWARE_REQUIREMENTS.md)
+- [PlatformIO](https://platformio.org/) to build and flash
+- A fused, ignition-switched 12 V supply with an automotive-grade regulator
+
+## Installation and Setup
+
+1. Read [Hardware requirements](docs/hardware/HARDWARE_REQUIREMENTS.md) and
+   [Signal conditioning](docs/hardware/SIGNAL_CONDITIONING.md).
+2. Build and flash:
+   ```bash
+   pio run -e esp32s3_omobd -t upload
+   ```
+3. Bench-test with the [bench testing guide](docs/testing/BENCH_TESTING.md).
+4. Install on the engine:
+   [OM617 in a Mercedes](docs/installation/OM617_INSTALLATION.md) or
+   [OM617 in a Jeep conversion](docs/installation/OM617_JEEP_CONVERSION.md).
+
+## Usage
+
+At start-up the unit prints its Wi-Fi network name and a per-device password
+on the USB console. Join that network and open `http://192.168.4.1`.
+
+Load an engine profile's sensor configuration over USB:
 
 ```
 CONFIG
-SET A0 COOLANT_TEMP VDO_120C_TABLE      # pin, what it measures, which sender
-SET A1 OIL_PRESSURE VDO_5BAR_CURVE
-SET A1 ALARM MIN 0.7                    # alarm below 0.7 bar
+JSON IMPORT
+```
+
+Paste `engine-profiles/OM617/configs/esp32s3-om617-turbo.preobd.json`, finish with a line
+`END JSON`, check with `LIST INPUTS`, then:
+
+```
 SAVE
 RUN
 ```
 
-Type `HELP` on the device for the full command list.
+The profile configs contain **no alarm limits**. Add your own once you have
+validated figures — see [Alarm thresholds](docs/calibration/ALARM_THRESHOLDS.md).
 
----
+## How It Works
 
-## Supported Hardware
+```
+ senders ─► signal conditioning ─► ESP32-S3 ──► preOBD core (read, calibrate, alarm, log, OBD/CAN/BLE)
+                                        └──► OMOBD (calculated values, history) ─► Wi-Fi ─► browser
+```
 
-| Board | Notes |
-|-------|-------|
-| **Teensy 4.1** | Recommended — every feature, built-in SD slot, 3 native CAN buses |
-| Teensy 4.0 / 3.6 | Every feature; native CAN |
-| ESP32-S3 | Every feature; native CAN (TWAI) |
-| Feather STM32F405 | Every feature; native CAN (bxCAN), built-in SD slot |
-| Arduino Mega 2560 | 5V; up to 8 inputs; no SD logging, RealDash, Bluetooth OBD or CLI history (8 KB RAM) |
+OMOBD's code lives in `src/omobd/` and runs in the same loop as preOBD; the
+preOBD core is reused rather than duplicated. Details:
+[Web dashboard and API](docs/omobd/WEB_DASHBOARD.md),
+[Virtual OBD](docs/omobd/VIRTUAL_OBD.md),
+[Reliability](docs/omobd/RELIABILITY.md),
+[Development guide](docs/omobd/DEVELOPMENT.md).
 
-See [Choosing Hardware](docs/getting-started/CHOOSING_HARDWARE.md) for the full comparison.
+## Known Limitations
 
----
+- **No hardware validation yet.** The firmware builds and the host tests pass;
+  nothing has been run on an OM617. See
+  [Hardware validation status](docs/testing/HARDWARE_VALIDATION_STATUS.md).
+- The EDMS-II history page is incomplete: the forum thread could not be read
+  when it was written ([EDMS-II](docs/history/EDMS-II.md)).
+- No engine thresholds are supplied; every warning limit is yours to set.
+- DS18B20 sensors and fuel-flow measurement are not supported yet
+  ([Roadmap](ROADMAP.md)).
+- An OM617 has no ECU: OBD-style data is synthetic and there are no fault codes.
 
-## Documentation
+## Compatibility
 
-**Start here**
-- [Choosing Hardware](docs/getting-started/CHOOSING_HARDWARE.md)
-- [Getting Started](docs/getting-started/GETTING_STARTED.md) — zero to first reading
-- [Quick Reference](docs/getting-started/QUICK_REFERENCE.md) — everyday commands
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-
-**Guides** — sensors, wiring, alarms, relays, outputs: see the [documentation index](docs/README.md)
-
-**Reference**
-- [Serial Commands](docs/reference/SERIAL_COMMANDS.md) — every command
-- [OBD-II PIDs](docs/reference/OBD2_PID_REFERENCE.md)
-
-**Contributing** — [Development documentation](docs/development/README.md)
-
----
-
-## Contributing
-
-Contributions are welcome:
-
-1. **Sensor calibrations** — share data for senders that aren't in the library yet
-2. **Platform testing** — try it on your hardware and report back
-3. **Documentation** — tell us what was unclear
-4. **Bug reports** — help make it more reliable
-
-Please test on hardware before submitting, include datasheets for new sensors, and
-follow the existing code style. The [development documentation](docs/development/README.md)
-explains how the code is organised.
-
-## Community and Support
-
-- **GitHub Issues** — bug reports and feature requests
-- **GitHub Discussions** — questions and setup help
-
-When asking for help, include your board, the output of `VERSION`, `SYSTEM DUMP`
-and `SYSTEM DIAG`, and what you've already tried. See [Troubleshooting](docs/TROUBLESHOOTING.md).
+- [Engine compatibility matrix](docs/om-engines/ENGINE_COMPATIBILITY.md)
+- [Sensor compatibility matrix](docs/hardware/SENSOR_COMPATIBILITY.md)
+- [Troubleshooting](docs/omobd/TROUBLESHOOTING.md) (and preOBD's [Troubleshooting](docs/TROUBLESHOOTING.md))
 
 ## License
 
-preOBD is licensed under a custom **MIT + NonCommercial License**.
+OMOBD inherits preOBD's **MIT + NonCommercial License** ([LICENSE](LICENSE)).
+Personal, educational and other non-commercial use, modification and
+publication are allowed with attribution. **Commercial use is not permitted**
+without written permission from the preOBD copyright holder. OMOBD is not
+"open source" in the OSI sense. Details, and the status of EDMS-II material:
+[docs/LICENSING.md](docs/LICENSING.md).
 
-### What You Can Do (Personal / Noncommercial Use)
-- Use the software for personal projects
-- Modify, fork, or extend the software
-- Publish your modifications (noncommercially)
-- Learn from and build upon the source code
-- Use it for educational or research purposes
+## Contributing
 
-### What You Cannot Do (Without Permission)
-- Sell the software
-- Bundle it into a product you sell
-- Use it in a for-profit business
-- Monetize it in any form
-- Distribute commercial derivatives
+See [CONTRIBUTING.md](CONTRIBUTING.md). Especially wanted: verified OM engine
+data (with sources), installation reports, and EDMS-II research from the
+PeachParts thread.
 
-For commercial use, contact: info@preobd.com
+## Related Projects
 
-See [LICENSE](LICENSE) file for complete terms.
+- [preOBD](https://github.com/preobd/preOBD) — the upstream project
+- [preOBD Web Bluetooth app](https://preobd.github.io/preOBD/) — works with OMOBD's BLE link too
 
----
+## Acknowledgments
 
-**preOBD is beta software. See [DISCLAIMER](DISCLAIMER.md) for important safety information and limitations.**
+- **preOBD** — Copyright (c) 2020–2025 Eric Nichols and the preOBD
+  contributors. The sensor library, calibration, alarm engine, OBD-II/CAN/BLE
+  outputs, CLI, storage and test suite are theirs.
+- **EDMS-II** — **Paul** (PeachParts **mach4 / Idahobenz**) for the original OM
+  engine instrumentation concept, experimentation and documentation, and
+  for permission to build on it. [History](docs/history/EDMS-II.md).
+- Mercedes-Benz is a trademark of Mercedes-Benz Group AG. Jeep is a trademark
+  of FCA US LLC. OMOBD is not affiliated with or endorsed by either.

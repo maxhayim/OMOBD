@@ -129,3 +129,29 @@ Community support is provided on a best-effort basis through GitHub:
 ---
 
 **Bottom line: Use preOBD responsibly, maintain backups, test thoroughly, and accept that you are responsible for your engine's safety.**
+
+---
+
+# OMOBD Addendum
+
+OMOBD is a modified version of preOBD for Mercedes-Benz OM diesel engines.
+Everything above applies to OMOBD in full. In addition:
+
+- **Development status:** OMOBD's additions (Wi-Fi dashboard, engine profiles,
+  calculated values) build and pass host tests but have **not yet been
+  validated on a running engine**. See `docs/testing/HARDWARE_VALIDATION_STATUS.md`.
+- **No engine thresholds are supplied.** Warning limits must come from your
+  engine's documentation and your own validation. preOBD's generic preset
+  limits are not OM engine specifications.
+- **Calculated values** (boost, vacuum depth, engine hours, oil-pressure-vs-RPM
+  advisory) are derived from other readings and are only as good as those
+  readings and their calibration.
+- **No ECU, no OBD system:** on mechanically injected engines such as the
+  OM617, OBD-style data from OMOBD is synthetic and no fault codes exist.
+- **Do not watch the dashboard while driving.** Mount any display legally and
+  safely; let a passenger read it or use logs.
+- **Installation risks:** drilling exhaust manifolds (debris can destroy a
+  turbocharger), tapping pressure and vacuum lines (leaks), and electrical
+  work all carry risk of damage. Work only within your competence.
+- OMOBD's contributors, preOBD's contributors, and Paul (EDMS-II) accept no
+  liability for its use.

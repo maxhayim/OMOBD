@@ -1,3 +1,26 @@
+# OMOBD changes
+
+## OMOBD 0.1.0 — OM617 foundation (2026-11-13, branch `omobd-dev`)
+
+Fork of preOBD (`preobd/preOBD` main at the fork point). Everything below this
+section is preOBD's own changelog, kept unchanged.
+
+### Added
+- `esp32s3_omobd` board: preOBD on ESP32-S3 plus the OMOBD Wi-Fi dashboard; platform pinned to espressif32 6.13.0.
+- `src/omobd/`: Wi-Fi AP/station with fallback, HTTP API (`/api/live`, `/api/history`, `/api/status`, `/api/settings`, `/api/config/export`, `/api/logging`), NVS settings with validation, history buffers, calculated boost/vacuum with configurable atmospheric reference, engine-hour meter, RPM-dependent oil pressure advisory.
+- `dashboard/`: offline browser dashboard (editable multi-page gauges, history graph, sensors table, settings, backups), embedded at build time.
+- Applications `VACUUM` (PID 0xB8) and `ENGINE_BAY_TEMP` (PID 0xB9), appended so stored indices don't change.
+- `engine-profiles/`: OM617 (NA + turbo, ESP32-S3 configs) and planned OM615/616/601/602/603/604/605/606.
+- `tools/omobd/validate_profiles.py` + tests; host tests `test_omobd_derived`, `test_omobd_settings`, `test_omobd_live`, `test_omobd_presets`, `test_omobd_profile_import`.
+- OMOBD docs: history (EDMS-II), hardware, installation (factory + Jeep), calibration, testing, dashboard/API, virtual OBD, reliability, licensing.
+- CI workflow `.github/workflows/omobd-ci.yml`.
+
+### Changed
+- `src/main.cpp`: product name macro (BLE name `OMOBD` on the OMOBD board), OMOBD init/update calls (no-ops on other boards).
+- `src/hal/platforms/watchdog_esp32.h`: works with ESP-IDF 5 (Arduino-ESP32 3.x) as well as 4.x. Unpinned `espressif32` (8.x) previously failed to compile.
+
+---
+
 # Changelog
 
 All notable changes to preOBD will be documented in this file.
