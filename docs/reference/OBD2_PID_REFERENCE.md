@@ -5,7 +5,7 @@
 preOBD answers OBD-II Service 01 ("Mode 01", show current data) requests, plus the status and trouble-code queries a tool makes at start-up, over CAN and through its ELM327 emulation. You wire analog sensors to preOBD and tell it what each one measures. A standard tool (Torque, Car Scanner, OBD Fusion or a handheld scanner) then reads them like any ECU value, **with no setup**, wherever SAE J1979 defines a PID for that quantity.
 
 - **Standard PIDs** use J1979's exact encoding. A tool decodes them with the formula it already knows.
-- **preOBD PIDs** (0xAA–0xB7) carry sensors J1979 has no PID for: oil pressure, cylinder head temperature, transmission temperature and so on. A tool needs a one-time custom-PID entry for each, with the formula in the table below.
+- **preOBD PIDs** (0xAA–0xB9; 0xB8–0xB9 added by OMOBD) carry sensors J1979 has no PID for: oil pressure, cylinder head temperature, transmission temperature and so on. A tool needs a one-time custom-PID entry for each, with the formula in the table below.
 
 Every application gets its PID automatically, and `SET <pin> OBD_PID <pid>` changes it. Each encoding was checked against Wikipedia's "OBD-II PIDs", CSS Electronics' J1979 table, and DashLogic's J1979 PID listing (see `src/sensors/can_sensor_library/obd_output_pids.h` for which source confirms what).
 
@@ -50,7 +50,7 @@ negative response only when it's addressed to preOBD (`0x7E0`): see
 - **0x70 and 0x78 are multi-frame replies**, longer than one CAN frame. preOBD sends the First Frame, waits for the tool's Flow Control, then sends the rest (ISO 15765-2). The ELM327 emulation prints them the way an ELM327 does.
 - Any other single-value J1979 PID in preOBD's import table (`LIST PIDS JSON`) can be assigned with `SET <pin> OBD_PID`, as long as the input measures the same quantity.
 
-## preOBD PIDs 0xAA–0xB7 (need a custom-PID entry)
+## preOBD PIDs 0xAA–0xB9 (need a custom-PID entry)
 
 J1979 has no PID for these quantities, so every tool needs them entered once. The formulas use Torque's syntax. Enter "Equation" as shown, "OBD Mode and PID" as `01` plus the PID (e.g. `01AA`), and the header `7E0` if asked.
 
@@ -70,9 +70,11 @@ J1979 has no PID for these quantities, so every tool needs them entered once. Th
 | `0xB5` | `ELEVATION` | 2 | `((A*256)+B)-500` | −500 to 65035 | m |
 | `0xB6` | `COOLANT_LEVEL` | 1 | `A/255` | 1 = OK, 0 = low | |
 | `0xB7` | `OIL_LEVEL` | 1 | `A/255` | 1 = OK, 0 = low | |
+| `0xB8` | `VACUUM` (OMOBD) | 2 | `((A*256)+B)/10` | 0 to 6553.5 | kPa (absolute) |
+| `0xB9` | `ENGINE_BAY_TEMP` (OMOBD) | 2 | `((A*256)+B)/10-40` | | °C |
 
 - Temperatures use J1979's own wide temperature layout (the catalyst-temperature formula), so a CHT or an air-cooled head above 215 °C is not clipped.
-- Pressures are gauge, in 1 kPa steps. Vacuum reads negative.
+- Pressures are gauge, in 1 kPa steps. Vacuum reads negative. Exception: OMOBD's `VACUUM` (0xB8) is the absolute pressure in the vacuum line, in 0.1 kPa steps; vacuum depth is atmospheric pressure minus this value.
 - 0xAA–0xBF is unassigned in the J1979 tables used as sources. A future J1979 revision could assign it. 0xB8–0xBF are free.
 
 ## Your own PID

@@ -10,7 +10,7 @@
  * A PID's encoding is resolved in this order:
  *  1. OBD_OUTPUT_TABLE: J1979 PIDs whose reply is more than a plain value
  *     (a sensor-support byte, several sensors, multi-frame: 0x70, 0x78) and
- *     the preOBD block 0xAA-0xB7.
+ *     the preOBD block 0xAA-0xB9 (0xB8-0xB9 added by OMOBD).
  *  2. STANDARD_PID_TABLE (standard_pids.h, #509): every single-value J1979
  *     PID, encoded as the exact inverse of how SET CAN decodes it, so the two
  *     directions cannot drift apart.
@@ -58,7 +58,7 @@ struct ObdOutputPid {
     const char* units;       // registry name/alias (PROGMEM); nullptr: no unit (DIGITAL 0/1)
 };
 
-#define NUM_OBD_OUTPUT_PIDS 16
+#define NUM_OBD_OUTPUT_PIDS 18
 extern const PROGMEM ObdOutputPid OBD_OUTPUT_TABLE[];
 
 /**

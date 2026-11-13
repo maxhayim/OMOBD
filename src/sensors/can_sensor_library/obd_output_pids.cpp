@@ -38,6 +38,8 @@ const PROGMEM ObdOutputPid OBD_OUTPUT_TABLE[] = {
     {0xB5,  2, 0,    0, 2, OBD_OUT_PREOBD,   MEASURE_ELEVATION,   1.0f,     -500.0f, PSTR_O_M},       // altitude
     {0xB6,  1, 0,    0, 1, OBD_OUT_PREOBD,   MEASURE_DIGITAL,     (1.0f / 255.0f), 0.0f, nullptr},    // coolant level: 0 / 255
     {0xB7,  1, 0,    0, 1, OBD_OUT_PREOBD,   MEASURE_DIGITAL,     (1.0f / 255.0f), 0.0f, nullptr},    // oil level: 0 / 255
+    {0xB8,  2, 0,    0, 2, OBD_OUT_PREOBD,   MEASURE_PRESSURE,    0.1f,        0.0f, PSTR_O_KPA},     // OMOBD vacuum line, absolute, 0.1 kPa
+    {0xB9,  2, 0,    0, 2, OBD_OUT_PREOBD,   MEASURE_TEMPERATURE, 0.1f,      -40.0f, PSTR_O_C},       // OMOBD engine compartment temp
 };
 
 static_assert(sizeof(OBD_OUTPUT_TABLE) / sizeof(OBD_OUTPUT_TABLE[0]) == NUM_OBD_OUTPUT_PIDS,

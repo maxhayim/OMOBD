@@ -126,6 +126,14 @@ static const char PSTR_OIL_LEVEL_LABEL[] PROGMEM = "Engine Oil Level";
 static const char PSTR_INTERCOOLER_TEMP[] PROGMEM = "INTERCOOLER_TEMP";
 static const char PSTR_INTERCOOLER_TEMP_ABBR[] PROGMEM = "ICT";
 static const char PSTR_INTERCOOLER_TEMP_LABEL[] PROGMEM = "Intercooler Temperature";
+// OMOBD additions (appended so existing stored application indices don't move)
+static const char PSTR_VACUUM[] PROGMEM = "VACUUM";
+static const char PSTR_VACUUM_ABBR[] PROGMEM = "VAC";
+static const char PSTR_VACUUM_LABEL[] PROGMEM = "Vacuum System (absolute)";
+static const char PSTR_VACUUM_DESC[] PROGMEM = "Absolute pressure in a vacuum line (pump, reservoir, actuator). Vacuum depth = atmosphere - this.";
+static const char PSTR_ENGINE_BAY_TEMP[] PROGMEM = "ENGINE_BAY_TEMP";
+static const char PSTR_ENGINE_BAY_TEMP_ABBR[] PROGMEM = "EBT";
+static const char PSTR_ENGINE_BAY_TEMP_LABEL[] PROGMEM = "Engine Compartment Temperature";
 
 // ===== APPLICATION PRESETS (PROGMEM - Flash Memory) =====
 //
@@ -775,6 +783,50 @@ const PROGMEM ApplicationPreset APPLICATION_PRESETS[] = {
         .warmupTime_ms = 10000,
         .persistTime_ms = 5000,
         .group = APP_GROUP_INDUCTION
+    },
+
+    // ===== OMOBD ADDITIONS =====
+    // Index 29: VACUUM - absolute pressure in a vacuum line. No default alarm:
+    // vacuum levels depend on the pump, reservoir and engine — set your own.
+    {
+        .name = PSTR_VACUUM,
+        .abbreviation = PSTR_VACUUM_ABBR,
+        .label = PSTR_VACUUM_LABEL,
+        .description = PSTR_VACUUM_DESC,
+        .defaultSensor = SENSOR_MPX4250AP,
+        .defaultUnits = 2,
+        .defaultMinValue = 0.0,
+        .defaultMaxValue = 1.1,
+        .obd2pid = 0xB8,   // OMOBD: obd_output_pids.h
+        .obd2length = 2,
+        .defaultAlarmEnabled = false,
+        .defaultDisplayEnabled = true,
+        .expectedMeasurementType = MEASURE_PRESSURE,
+        .nameHash = 0x15D6,  // djb2_hash("VACUUM")
+        .warmupTime_ms = 5000,
+        .persistTime_ms = 2000,
+        .group = APP_GROUP_ENGINE
+    },
+
+    // Index 30: ENGINE_BAY_TEMP - air temperature under the hood. No default alarm.
+    {
+        .name = PSTR_ENGINE_BAY_TEMP,
+        .abbreviation = PSTR_ENGINE_BAY_TEMP_ABBR,
+        .label = PSTR_ENGINE_BAY_TEMP_LABEL,
+        .description = nullptr,
+        .defaultSensor = SENSOR_GENERIC_TEMP_LINEAR,
+        .defaultUnits = 0,
+        .defaultMinValue = -40.0,
+        .defaultMaxValue = 125.0,
+        .obd2pid = 0xB9,   // OMOBD: obd_output_pids.h
+        .obd2length = 2,
+        .defaultAlarmEnabled = false,
+        .defaultDisplayEnabled = true,
+        .expectedMeasurementType = MEASURE_TEMPERATURE,
+        .nameHash = 0xA76B,  // djb2_hash("ENGINE_BAY_TEMP")
+        .warmupTime_ms = 10000,
+        .persistTime_ms = 5000,
+        .group = APP_GROUP_ENVIRONMENT
     }
 };
 

@@ -97,7 +97,7 @@ struct ApplicationPreset {
 // sizeof(...) — an extern array of unknown bound can't be sized from here.
 // application_presets.cpp carries a static_assert tying it to the array's real
 // extent so the two cannot silently drift.
-#define NUM_APPLICATION_PRESETS 29
+#define NUM_APPLICATION_PRESETS 31
 
 extern const PROGMEM ApplicationPreset APPLICATION_PRESETS[];
 
