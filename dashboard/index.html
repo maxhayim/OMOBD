@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a1a19">
+<title>OMOBD</title>
+<style>
+/* OMOBD dashboard. Served by the device itself: no fonts, scripts or images
+   from the internet, so it works in a car with no signal. */
+:root {
+  color-scheme: dark;
+  --surface-0: #111110; --surface-1: #1a1a19; --surface-2: #242422;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --series: #3987e5;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --on-warning: #0b0b0b;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --surface-0: #f2f1ec; --surface-1: #fcfcfb; --surface-2: #ffffff;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #77766f;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --series: #2a78d6;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { background: var(--surface-2); border: 1px solid var(--ring); border-radius: 8px;
+  padding: 8px 12px; cursor: pointer; min-height: 40px; }
+button.primary { background: var(--series); color: #fff; border-color: transparent; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--series); outline-offset: 2px; }
+header { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center;
+  flex-wrap: wrap; padding: 8px 12px; background: var(--surface-1); border-bottom: 1px solid var(--ring); }
+header h1 { font-size: 17px; margin: 0 8px 0 0; letter-spacing: .04em; }
+.link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); }
+.dot.ok { background: var(--good); } .dot.bad { background: var(--critical); }
+nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+nav button[aria-selected="true"] { background: var(--series); color: #fff; }
+#banner { display: none; padding: 10px 14px; font-weight: 600; }
+#banner.warning { display: block; background: var(--warning); color: var(--on-warning); }
+#banner.critical { display: block; background: var(--critical); color: #fff; }
+#banner.stale { display: block; background: var(--surface-2); color: var(--text-primary); border-bottom: 2px solid var(--critical); }
+main { padding: 12px; max-width: 1400px; margin: 0 auto; }
+.grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); grid-auto-flow: dense; }
+.tile { position: relative; background: var(--surface-1); border: 1px solid var(--ring); border-radius: 12px;
+  padding: 10px 12px 12px; min-height: 150px; display: flex; flex-direction: column; }
+.tile.s2 { grid-column: span 2; } .tile.s3 { grid-column: span 3; }
+@media (max-width: 380px) { .tile.s2, .tile.s3 { grid-column: span 1; } }
+.tile.sev2 { border: 2px solid var(--warning); } .tile.sev3 { border: 2px solid var(--critical); }
+.tile .top { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+.tile .name { font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+.tag { font-size: 11px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--ring); color: var(--text-secondary); }
+.value { font-size: 34px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: auto; }
+.tile.s2 .value { font-size: 46px; }
+.unit { font-size: 15px; color: var(--text-secondary); margin-left: 4px; font-weight: 400; }
+.state { font-size: 12px; font-weight: 600; margin-top: 4px; min-height: 16px; }
+.state.warn { color: var(--warning); } .state.crit { color: var(--critical); } .state.muted { color: var(--text-muted); }
+.stale .value, .nodata .value { color: var(--text-muted); }
+svg.dial { width: 100%; max-height: 120px; margin-top: 4px; }
+.barwrap { height: 10px; background: var(--grid); border-radius: 5px; margin-top: 10px; overflow: hidden; }
+.barfill { height: 100%; background: var(--series); border-radius: 0 4px 4px 0; transition: width .3s; }
+.edit-tools { display: none; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.editing .edit-tools { display: flex; }
+.edit-tools button { min-height: 32px; padding: 4px 8px; font-size: 13px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.panel { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.panel h2 { font-size: 16px; margin: 0 0 10px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--grid); font-size: 14px; }
+th { color: var(--text-secondary); font-weight: 600; }
+textarea { width: 100%; min-height: 260px; background: var(--surface-2); border: 1px solid var(--ring);
+  border-radius: 8px; padding: 8px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+select, input[type=text], input[type=password], input[type=number] { background: var(--surface-2);
+  border: 1px solid var(--ring); border-radius: 8px; padding: 8px; min-height: 40px; }
+.chartbox { position: relative; }
+canvas#hist { width: 100%; height: 320px; display: block; background: var(--surface-1); border-radius: 8px; }
+#tip { position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--ring);
+  border-radius: 6px; padding: 4px 8px; font-size: 13px; display: none; white-space: nowrap; }
+.note { color: var(--text-secondary); font-size: 13px; }
+.msg { font-size: 14px; margin-left: 8px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OMOBD</h1>
+  <span class="link" title="Connection to the OMOBD unit"><span id="linkDot" class="dot"></span><span id="linkText">connecting…</span></span>
+  <span class="link" id="profileLabel"></span>
+  <nav id="nav" role="tablist"></nav>
+</header>
+<div id="banner" role="alert"></div>
+<main>
+  <section id="view-gauges">
+    <div class="toolbar">
+      <button id="editBtn" aria-pressed="false">Edit layout</button>
+      <span id="editBar" hidden>
+        <select id="addKey" aria-label="Gauge to add"></select>
+        <select id="addType" aria-label="Gauge type"><option value="dial">Dial</option><option value="bar">Bar</option><option value="number">Number</option></select>
+        <button id="addBtn">Add gauge</button>
+        <button id="addPageBtn">New page</button>
+        <button id="delPageBtn">Delete page</button>
+        <button id="resetBtn">Reset to profile</button>
+      </span>
+    </div>
+    <div id="grid" class="grid" aria-live="off"></div>
+  </section>
+
+  <section id="view-history" hidden>
+    <div class="panel">
+      <div class="toolbar">
+        <label>Channel <select id="histKey"></select></label>
+        <button id="histLoad">Load from unit</button>
+        <span class="note">Up to the last 10 minutes kept on the unit. Gaps are times the sensor gave no valid reading.</span>
+      </div>
+      <h2 id="histTitle">—</h2>
+      <div class="chartbox"><canvas id="hist" role="img" aria-label="History graph"></canvas><div id="tip"></div></div>
+      <details style="margin-top:8px"><summary>Table view</summary><div id="histTable" style="max-height:240px;overflow:auto"></div></details>
+    </div>
+  </section>
+
+  <section id="view-sensors" hidden>
+    <div class="panel">
+      <h2>Sensors and connection status</h2>
+      <p class="note">Every input configured on the unit. "Calculated" values are derived from measured ones and are labelled everywhere they appear.</p>
+      <div id="sensorTable"></div>
+    </div>
+  </section>
+
+  <section id="view-settings" hidden>
+    <div class="panel">
+      <h2>Engine profile</h2>
+      <div class="toolbar">
+        <select id="profileSel" aria-label="Engine profile"></select>
+        <select id="variantSel" aria-label="Variant"></select>
+        <button id="profileApply" class="primary">Use this profile</button>
+        <span class="msg" id="profileMsg"></span>
+      </div>
+      <p class="note" id="profileNote"></p>
+      <p class="note">Wiring a profile's sensors is done with the matching preOBD config file (see the engine's folder in <code>engine-profiles/</code>) imported over USB with <code>JSON IMPORT</code>. Selecting a profile here sets the dashboard layout and the profile name stored on the unit.</p>
+    </div>
+    <div class="panel">
+      <h2>Display units</h2>
+      <div class="toolbar">
+        <label>Boost <select id="uBoost"><option>bar</option><option>psi</option><option>kPa</option></select></label>
+        <label>Vacuum <select id="uVac"><option>inHg</option><option>bar</option><option>kPa</option></select></label>
+        <label>Theme <select id="uTheme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+      </div>
+      <p class="note">Sensor values are shown in the units configured on the unit (preOBD <code>SET &lt;pin&gt; UNITS</code>).</p>
+    </div>
+    <div class="panel">
+      <h2>Unit status</h2>
+      <div id="statusTable"></div>
+    </div>
+    <div class="panel">
+      <h2>Logging</h2>
+      <div class="toolbar">
+        <button id="logOn">Start SD logging</button><button id="logOff">Stop SD logging</button>
+        <span class="msg" id="logMsg"></span>
+      </div>
+      <p class="note">Starts or stops preOBD's SD-card log until the next restart (same as <code>OUTPUT SD_Log ENABLE</code> without <code>SAVE</code>). Needs an SD card module.</p>
+    </div>
+    <div class="panel">
+      <h2>Backups</h2>
+      <div class="toolbar">
+        <a href="/api/config/export" download><button>Download sensor config (preOBD JSON)</button></a>
+        <a href="/api/settings?download=1" download><button>Download OMOBD settings</button></a>
+        <button id="layoutExport">Download dashboard layout</button>
+        <label><button id="layoutImportBtn">Restore dashboard layout…</button><input type="file" id="layoutFile" accept="application/json" hidden></label>
+      </div>
+      <p class="note">Wi-Fi passwords are never included in downloads.</p>
+    </div>
+    <div class="panel">
+      <h2>Device settings</h2>
+      <p class="note">Changes need the unit's Wi-Fi password (it's printed on the USB console at start-up). Pins are preOBD input pin numbers; <code>null</code> = not fitted. Leave <code>oilCurve.points</code> empty until you have validated figures for your engine.</p>
+      <div class="toolbar">
+        <input type="password" id="authPass" placeholder="Unit Wi-Fi password" autocomplete="current-password" aria-label="Unit Wi-Fi password">
+        <button id="setLoad">Reload from unit</button>
+        <button id="setSave" class="primary">Save to unit</button>
+        <span class="msg" id="setMsg"></span>
+      </div>
+      <textarea id="setText" spellcheck="false" aria-label="OMOBD settings JSON"></textarea>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+// Profile catalog, injected at build time from engine-profiles/*/*.profile.json
+// by scripts/omobd_embed_dashboard.py.
+const PROFILES = /*OMOBD_PROFILES*/[];
+
+// ---- display scales (NOT alarm limits: alarms come from the unit) -------------
+const SCALES = {
+  ENGINE_RPM: [0, 5000], EGT: [0, 900], "derived.boost": [-0.2, 1.4], OIL_PRESSURE: [0, 5],
+  COOLANT_TEMP: [20, 130], OIL_TEMP: [20, 150], TRANS_TEMP: [20, 150], PRIMARY_BATTERY: [10, 16],
+  "derived.vacuum": [0, 30], FUEL_PRESSURE: [0, 2], INTAKE_AIR_TEMP: [-20, 80], ENGINE_BAY_TEMP: [-20, 120],
+  MAP_PRESSURE: [0, 2.5], VACUUM: [0, 1.1],
+};
+const DERIVED = {
+  "derived.boost": { label: "Boost", abbr: "BOOST" },
+  "derived.vacuum": { label: "Vacuum", abbr: "VAC" },
+  "derived.engineHours": { label: "Engine hours", abbr: "HRS" },
+};
+const HEALTH_TEXT = { no_reading: "No signal yet", fault: "Sensor fault", out_of_range: "Out of range", disabled: "Off" };
+
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("omobd." + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("omobd." + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+let live = null, lastOk = 0, pollMs = 500, editing = false, pageIdx = 0, view = "gauges";
+let layout = store.get("layout", null);
+const prefs = Object.assign({ boost: "bar", vac: "inHg", theme: "dark" }, store.get("prefs", {}));
+const spark = {};   // key -> recent values (client-side, for the history page fallback)
+
+// ---- profiles & layout ------------------------------------------------------
+function profileById(id) {
+  if (!id) return null;
+  const fam = id.split(".")[0];
+  return PROFILES.find(p => p.id === id) || PROFILES.find(p => p.id === fam) || null;
+}
+function aspirationFor(profileId, p) {
+  if (!p) return null;
+  const v = (p.variants || []).find(v => v.id === profileId);
+  return v ? v.aspiration : null;
+}
+function layoutFromProfile(profileId) {
+  let p = profileById(profileId);
+  if (p && p.dashboard && p.dashboard.inherit) p = Object.assign({}, p, { dashboard: (profileById(p.dashboard.inherit) || {}).dashboard });
+  const asp = aspirationFor(profileId, profileById(profileId));
+  const pages = ((p && p.dashboard && p.dashboard.pages) || [{ title: "Engine", widgets: [] }]).map(pg => ({
+    title: pg.title,
+    widgets: pg.widgets.filter(w => !w.variants || !asp || w.variants.includes(asp))
+                       .map(w => ({ key: w.key, type: w.type, size: w.size || 1 })),
+  }));
+  return { profile: profileId, pages };
+}
+function saveLayout() { store.set("layout", layout); }
+
+// ---- value helpers ------------------------------------------------------------
+function channelFor(key) {
+  if (!live) return null;
+  if (key.startsWith("derived.")) {
+    const d = live.derived || {};
+    if (key === "derived.boost") return conv("boost", d.boost && d.boost.bar);
+    if (key === "derived.vacuum") return conv("vac", d.vacuum && d.vacuum.bar);
+    if (key === "derived.engineHours") {
+      const h = d.engineHours && d.engineHours.hours;
+      return { value: h, unit: "h", health: h == null ? "no_reading" : "ok", src: "calculated", severity: 0 };
+    }
+    return null;
+  }
+  return live.channels.find(c => c.key === key) || null;
+}
+function conv(kind, bar) {
+  const u = kind === "boost" ? prefs.boost : prefs.vac;
+  let v = bar;
+  if (v != null) {
+    if (u === "psi") v = bar * 14.5037738;
+    else if (u === "kPa") v = bar * 100;
+    else if (u === "inHg") v = bar * 29.5299831;
+  }
+  return { value: v, unit: u, health: v == null ? "no_reading" : "ok", src: "calculated", severity: 0, kind };
+}
+function scaleFor(key, ch) {
+  let s = SCALES[key] || [0, 100];
+  if (ch && ch.kind) {   // derived values scale with their unit
+    const f = ch.unit === "psi" ? 14.5037738 : ch.unit === "kPa" ? 100 : ch.unit === "inHg" ? 29.5299831 : 1;
+    s = key === "derived.vacuum" && ch.unit === "inHg" ? [0, 30] : [s[0] * f, s[1] * f];
+    if (key === "derived.vacuum" && ch.unit !== "inHg") s = [0, ch.unit === "kPa" ? 100 : 1];
+  }
+  return s;
+}
+function fmt(v, key) {
+  if (v == null || !isFinite(v)) return "—";
+  const a = Math.abs(v);
+  if (key === "ENGINE_RPM") return Math.round(v / 10) * 10 + "";
+  return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : v.toFixed(2);
+}
+function labelFor(key) {
+  if (DERIVED[key]) return DERIVED[key].label;
+  const c = live && live.channels.find(c => c.key === key);
+  return c ? (c.label || c.abbr || key) : key.replace(/_/g, " ").toLowerCase();
+}
+
+// ---- rendering --------------------------------------------------------------
+function dialSvg(frac) {
+  // 240-degree arc. Track = grid colour, value = series colour; status is shown
+  // by the tile border + text, never by recolouring the arc alone.
+  const r = 46, cx = 60, cy = 58, a0 = 150, sweep = 240;
+  const pt = (deg) => { const t = deg * Math.PI / 180; return [cx + r * Math.cos(t), cy + r * Math.sin(t)]; };
+  const arc = (from, to) => { const [x1, y1] = pt(from), [x2, y2] = pt(to);
+    return `M${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${to - from > 180 ? 1 : 0} 1 ${x2.toFixed(1)},${y2.toFixed(1)}`; };
+  const f = Math.max(0, Math.min(1, frac || 0));
+  const val = f > 0.002 ? `<path d="${arc(a0, a0 + sweep * f)}" stroke="var(--series)" stroke-width="8" fill="none" stroke-linecap="round"/>` : "";
+  return `<svg class="dial" viewBox="0 0 120 100" aria-hidden="true"><path d="${arc(a0, a0 + sweep)}" stroke="var(--grid)" stroke-width="8" fill="none" stroke-linecap="round"/>${val}</svg>`;
+}
+function tileHtml(w, i) {
+  const ch = channelFor(w.key);
+  const stale = !live || Date.now() - lastOk > Math.max(3000, pollMs * 4);
+  const notFitted = !ch;
+  const sev = ch ? ch.severity : 0;
+  const health = ch ? ch.health : "no_reading";
+  const v = ch ? ch.value : null;
+  const [lo, hi] = scaleFor(w.key, ch);
+  const frac = v == null ? 0 : (v - lo) / (hi - lo);
+  let state = "", cls = "muted";
+  if (stale) state = "No data from unit";
+  else if (notFitted) state = "Not fitted";
+  else if (sev >= 3) { state = "▲ ALARM"; cls = "crit"; }
+  else if (sev === 2) { state = "▲ Warning"; cls = "warn"; }
+  else if (HEALTH_TEXT[health]) { state = "● " + HEALTH_TEXT[health]; cls = health === "fault" || health === "out_of_range" ? "warn" : "muted"; }
+  const src = ch && ch.src === "calculated" ? '<span class="tag" title="Calculated from measured values">CALC</span>'
+            : ch && ch.src === "imported" ? '<span class="tag" title="Read from another controller over CAN">CAN</span>' : "";
+  const body = w.type === "dial" ? dialSvg(frac)
+             : w.type === "bar" ? `<div class="barwrap"><div class="barfill" style="width:${(Math.max(0, Math.min(1, frac)) * 100).toFixed(1)}%"></div></div>` : "";
+  return `<div class="tile s${w.size} sev${stale ? 0 : sev} ${stale ? "stale" : ""} ${v == null ? "nodata" : ""}" data-i="${i}">
+    <div class="top"><span class="name">${esc(labelFor(w.key))}</span>${src}</div>
+    ${body}
+    <div class="value">${fmt(stale ? null : v, w.key)}<span class="unit">${esc(ch ? ch.unit || "" : "")}</span></div>
+    <div class="state ${cls}">${state}</div>
+    <div class="edit-tools">
+      <button data-act="left" aria-label="Move earlier">◀</button><button data-act="right" aria-label="Move later">▶</button>
+      <button data-act="size">Size ${w.size}</button><button data-act="type">${w.type}</button><button data-act="del">Remove</button>
+    </div></div>`;
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+function renderNav() {
+  const tabs = layout.pages.map((p, i) => ({ id: "page:" + i, label: p.title }))
+    .concat([{ id: "history", label: "History" }, { id: "sensors", label: "Sensors" }, { id: "settings", label: "Settings" }]);
+  $("nav").innerHTML = tabs.map(t => {
+    const sel = (view === "gauges" && t.id === "page:" + pageIdx) || t.id === view;
+    return `<button role="tab" aria-selected="${sel}" data-tab="${t.id}">${esc(t.label)}</button>`;
+  }).join("");
+}
+function renderGauges() {
+  const page = layout.pages[pageIdx] || layout.pages[0];
+  $("grid").className = "grid" + (editing ? " editing" : "");
+  $("grid").innerHTML = page.widgets.length ? page.widgets.map(tileHtml).join("")
+    : '<p class="note">No gauges on this page. Choose “Edit layout” to add some.</p>';
+}
+function renderBanner() {
+  const b = $("banner");
+  const stale = Date.now() - lastOk > Math.max(3000, pollMs * 4);
+  if (stale) { b.className = "stale"; b.textContent = "Connection to the OMOBD unit lost — values are not current. Mechanical gauges remain your primary instruments."; return; }
+  const sev = live ? live.systemSeverity : 0;
+  if (sev >= 3) { b.className = "critical"; b.textContent = "▲ ALARM — " + activeNames(3); }
+  else if (sev === 2) { b.className = "warning"; b.textContent = "▲ Warning — " + activeNames(2); }
+  else { b.className = ""; b.textContent = ""; }
+  const oil = live && live.derived && live.derived.oilVsRpm;
+  if (oil && oil.state === "low" && sev < 3) { b.className = "warning"; b.textContent = "▲ Oil pressure below your configured curve for this RPM"; }
+}
+function activeNames(level) {
+  return live.channels.filter(c => c.severity >= level).map(c => c.label || c.abbr).join(", ") || "see Sensors";
+}
+function renderSensors() {
+  if (!live) return;
+  const rows = live.channels.map(c => `<tr><td>${esc(c.label || c.abbr)}</td><td>${c.pin}</td><td>${esc(c.key)}</td>
+    <td>${fmt(c.value, c.key)} ${esc(c.unit)}</td><td>${esc(HEALTH_TEXT[c.health] || "OK")}</td><td>${esc(c.src)}</td>
+    <td>${c.severity >= 3 ? "Alarm" : c.severity === 2 ? "Warning" : "—"}</td></tr>`).join("");
+  const d = live.derived || {};
+  const drow = (n, v, u, note) => `<tr><td>${n}</td><td>—</td><td>derived</td><td>${v == null ? "—" : fmt(v)} ${u}</td><td>${v == null ? "Needs inputs" : "OK"}</td><td>calculated</td><td>${note || "—"}</td></tr>`;
+  $("sensorTable").innerHTML = `<table><thead><tr><th>Input</th><th>Pin</th><th>Application</th><th>Value</th><th>Status</th><th>Source</th><th>Alarm</th></tr></thead><tbody>${rows}
+    ${drow("Atmospheric reference", d.atmosphere && d.atmosphere.bar, "bar", "source: " + ((d.atmosphere && d.atmosphere.source) || "—"))}
+    ${drow("Boost (MAP − atmosphere)", d.boost && d.boost.bar, "bar")}
+    ${drow("Vacuum (atmosphere − line)", d.vacuum && d.vacuum.bar, "bar")}
+    ${drow("Engine hours", d.engineHours && d.engineHours.hours, "h")}
+    <tr><td>Oil pressure vs RPM</td><td>—</td><td>derived</td><td>${d.oilVsRpm && d.oilVsRpm.minBar != null ? "min " + fmt(d.oilVsRpm.minBar) + " bar" : "—"}</td><td>${esc((d.oilVsRpm && d.oilVsRpm.state) || "—").replace(/_/g, " ")}</td><td>calculated</td><td>advisory</td></tr>
+    </tbody></table>`;
+}
+function render() {
+  renderNav(); renderBanner();
+  $("view-gauges").hidden = view !== "gauges";
+  $("view-history").hidden = view !== "history";
+  $("view-sensors").hidden = view !== "sensors";
+  $("view-settings").hidden = view !== "settings";
+  if (view === "gauges") renderGauges();
+  if (view === "sensors") renderSensors();
+  const stale = Date.now() - lastOk > Math.max(3000, pollMs * 4);
+  $("linkDot").className = "dot " + (stale ? "bad" : "ok");
+  $("linkText").textContent = stale ? "no connection" : live.mode === "CONFIG" ? "connected · CONFIG mode" : "connected";
+  $("profileLabel").textContent = live ? live.profile : "";
+}
+
+// ---- polling (never blocks the unit; a sleeping phone just stops asking) --------
+async function poll() {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), Math.max(1500, pollMs * 3));
+  try {
+    const r = await fetch("/api/live", { cache: "no-store", signal: ctl.signal });
+    if (r.ok) {
+      live = await r.json(); lastOk = Date.now();
+      for (const c of live.channels) pushSpark(c.key, c.value);
+      const d = live.derived || {};
+      pushSpark("derived.boost", d.boost && d.boost.bar);
+      pushSpark("derived.vacuum", d.vacuum && d.vacuum.bar);
+      if (!layout) { layout = layoutFromProfile(live.profile); saveLayout(); }
+    }
+  } catch (e) { /* stays stale; banner says so */ }
+  clearTimeout(t);
+  if (!layout) layout = layoutFromProfile("OM617");
+  render();
+  setTimeout(poll, pollMs);
+}
+function pushSpark(k, v) { (spark[k] = spark[k] || []).push(v == null ? null : v); if (spark[k].length > 600) spark[k].shift(); }
+
+// ---- layout editing -------------------------------------------------------------
+function allKeys() {
+  const keys = new Set(Object.keys(DERIVED));
+  if (live) live.channels.forEach(c => keys.add(c.key));
+  PROFILES.forEach(p => Object.values(p.capabilities || {}).forEach(c => c.app && keys.add(c.app)));
+  return [...keys];
+}
+$("editBtn").onclick = () => {
+  editing = !editing;
+  $("editBtn").setAttribute("aria-pressed", editing);
+  $("editBtn").textContent = editing ? "Done" : "Edit layout";
+  $("editBar").hidden = !editing;
+  $("addKey").innerHTML = allKeys().map(k => `<option value="${esc(k)}">${esc(labelFor(k))}</option>`).join("");
+  render();
+};
+$("addBtn").onclick = () => { layout.pages[pageIdx].widgets.push({ key: $("addKey").value, type: $("addType").value, size: 1 }); saveLayout(); render(); };
+$("addPageBtn").onclick = () => { const t = prompt("Page name", "Page " + (layout.pages.length + 1)); if (t) { layout.pages.push({ title: t, widgets: [] }); pageIdx = layout.pages.length - 1; saveLayout(); render(); } };
+$("delPageBtn").onclick = () => { if (layout.pages.length > 1 && confirm("Delete this page?")) { layout.pages.splice(pageIdx, 1); pageIdx = 0; saveLayout(); render(); } };
+$("resetBtn").onclick = () => { if (confirm("Replace your layout with the profile's default?")) { layout = layoutFromProfile(live ? live.profile : "OM617"); pageIdx = 0; saveLayout(); render(); } };
+$("grid").onclick = (e) => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const i = +b.closest(".tile").dataset.i, ws = layout.pages[pageIdx].widgets, w = ws[i];
+  const act = b.dataset.act;
+  if (act === "del") ws.splice(i, 1);
+  if (act === "left" && i > 0) [ws[i - 1], ws[i]] = [ws[i], ws[i - 1]];
+  if (act === "right" && i < ws.length - 1) [ws[i + 1], ws[i]] = [ws[i], ws[i + 1]];
+  if (act === "size") w.size = w.size % 3 + 1;
+  if (act === "type") w.type = { dial: "bar", bar: "number", number: "dial" }[w.type];
+  saveLayout(); render();
+};
+$("nav").onclick = (e) => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  const t = b.dataset.tab;
+  if (t.startsWith("page:")) { view = "gauges"; pageIdx = +t.slice(5); } else view = t;
+  if (view === "history") fillHistKeys();
+  if (view === "settings") { fillProfiles(); loadStatus(); if (!$("setText").value) loadSettings(); }
+  render();
+};
+
+// ---- history graph -------------------------------------------------------------
+function fillHistKeys() {
+  const opts = (live ? live.channels.map(c => [c.pin, c.label || c.abbr, c.key]) : [])
+    .map(([pin, l, k]) => `<option value="pin:${pin}" data-key="${esc(k)}">${esc(l)}</option>`).join("")
+    + '<option value="key:boost" data-key="derived.boost">Boost (calculated)</option><option value="key:vacuum" data-key="derived.vacuum">Vacuum (calculated)</option>';
+  const cur = $("histKey").value; $("histKey").innerHTML = opts; if (cur) $("histKey").value = cur;
+}
+let histData = null;
+$("histLoad").onclick = async () => {
+  const sel = $("histKey").value; if (!sel) return;
+  const [kind, id] = sel.split(":");
+  const q = kind === "pin" ? "pin=" + id : "key=" + id;
+  try {
+    const r = await fetch("/api/history?" + q, { cache: "no-store" });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    const opt = $("histKey").selectedOptions[0];
+    histData = { values: j.values, intervalMs: j.intervalMs, title: opt.textContent, key: opt.dataset.key };
+  } catch (e) {
+    const key = $("histKey").selectedOptions[0].dataset.key;
+    histData = { values: spark[key] || [], intervalMs: pollMs, title: $("histKey").selectedOptions[0].textContent + " (this browser's copy)", key };
+  }
+  drawHist();
+};
+function drawHist() {
+  const c = $("hist"), dpr = window.devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
+  c.width = W * dpr; c.height = H * dpr;
+  const g = c.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
+  const cs = getComputedStyle(document.documentElement);
+  const col = (n) => cs.getPropertyValue(n).trim();
+  if (!histData || !histData.values.length) { $("histTitle").textContent = "No samples yet"; $("histTable").innerHTML = ""; return; }
+  const vals = histData.values, n = vals.length, finite = vals.filter(v => v != null && isFinite(v));
+  $("histTitle").textContent = histData.title;
+  if (!finite.length) { g.fillStyle = col("--text-secondary"); g.fillText("No valid readings in this window", 20, 30); return; }
+  let lo = Math.min(...finite), hi = Math.max(...finite); if (hi - lo < 1e-6) { lo -= 1; hi += 1; }
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+  const L = 52, R = 12, T = 12, B = 28, pw = W - L - R, ph = H - T - B;
+  const x = i => L + (n === 1 ? pw : (i / (n - 1)) * pw), y = v => T + (1 - (v - lo) / (hi - lo)) * ph;
+  g.font = "12px system-ui, sans-serif"; g.fillStyle = col("--text-secondary"); g.strokeStyle = col("--grid"); g.lineWidth = 1;
+  for (let k = 0; k <= 4; k++) { const v = lo + (hi - lo) * k / 4, yy = Math.round(y(v)) + 0.5;
+    g.beginPath(); g.moveTo(L, yy); g.lineTo(W - R, yy); g.stroke(); g.fillText(fmt(v), 4, yy + 4); }
+  const secs = Math.round((n - 1) * histData.intervalMs / 1000);
+  g.fillText(`−${secs}s`, L, H - 8); g.fillText("now", W - R - 24, H - 8);
+  g.strokeStyle = col("--series"); g.lineWidth = 2; g.lineJoin = "round"; g.beginPath();
+  let pen = false;
+  vals.forEach((v, i) => { if (v == null || !isFinite(v)) { pen = false; return; }
+    if (!pen) { g.moveTo(x(i), y(v)); pen = true; } else g.lineTo(x(i), y(v)); });
+  g.stroke();
+  c.onmousemove = c.ontouchmove = (e) => {
+    const p = e.touches ? e.touches[0] : e, rc = c.getBoundingClientRect();
+    const i = Math.round(((p.clientX - rc.left - L) / pw) * (n - 1));
+    if (i < 0 || i >= n) { $("tip").style.display = "none"; return; }
+    const v = vals[i], ago = ((n - 1 - i) * histData.intervalMs / 1000).toFixed(0);
+    $("tip").style.display = "block"; $("tip").style.left = Math.min(W - 120, p.clientX - rc.left + 10) + "px"; $("tip").style.top = "10px";
+    $("tip").textContent = `${ago}s ago: ${v == null ? "no reading" : fmt(v)}`;
+  };
+  c.onmouseleave = () => { $("tip").style.display = "none"; };
+  const step = Math.max(1, Math.floor(n / 120));
+  let rows = ""; for (let i = n - 1; i >= 0; i -= step) rows += `<tr><td>−${((n - 1 - i) * histData.intervalMs / 1000).toFixed(0)} s</td><td>${vals[i] == null ? "no reading" : fmt(vals[i])}</td></tr>`;
+  $("histTable").innerHTML = `<table><thead><tr><th>Time</th><th>Value</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+window.addEventListener("resize", () => { if (view === "history") drawHist(); });
+
+// ---- settings -------------------------------------------------------------------
+function authHeaders() {
+  const p = $("authPass").value || sessionStorage.getItem("omobd.pass") || "";
+  if ($("authPass").value) sessionStorage.setItem("omobd.pass", $("authPass").value);
+  return p ? { Authorization: "Basic " + btoa("omobd:" + p) } : {};
+}
+async function postJson(url, body) {
+  const r = await fetch(url, { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()), body: JSON.stringify(body) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (r.status === 401) throw new Error("Wrong or missing Wi-Fi password");
+  if (!r.ok) throw new Error(j.error || ("HTTP " + r.status));
+  return j;
+}
+function fillProfiles() {
+  $("profileSel").innerHTML = PROFILES.map(p => `<option value="${esc(p.id)}">${esc(p.id)} — ${esc(p.status)}</option>`).join("");
+  const cur = live ? live.profile : "OM617", fam = profileById(cur);
+  if (fam) $("profileSel").value = fam.id;
+  fillVariants(cur);
+}
+function fillVariants(cur) {
+  const p = profileById($("profileSel").value);
+  const vs = (p && p.variants) || [];
+  $("variantSel").innerHTML = `<option value="${esc(p ? p.id : "")}">Any variant</option>` + vs.map(v => `<option value="${esc(v.id)}">${esc(v.label)}</option>`).join("");
+  if (cur && vs.some(v => v.id === cur)) $("variantSel").value = cur;
+  $("profileNote").textContent = p ? (p.statusNote || "") : "";
+}
+$("profileSel").onchange = () => fillVariants(null);
+$("profileApply").onclick = async () => {
+  const id = $("variantSel").value || $("profileSel").value;
+  try {
+    await postJson("/api/settings", { profileId: id });
+    $("profileMsg").textContent = "Saved on the unit.";
+  } catch (e) { $("profileMsg").textContent = "Not saved on the unit: " + e.message; }
+  if (confirm("Also replace the dashboard layout with this profile's default?")) { layout = layoutFromProfile(id); pageIdx = 0; saveLayout(); }
+  render();
+};
+async function loadSettings() {
+  try { const r = await fetch("/api/settings", { cache: "no-store" }); $("setText").value = JSON.stringify(await r.json(), null, 2); $("setMsg").textContent = ""; }
+  catch (e) { $("setMsg").textContent = "Could not read settings from the unit."; }
+}
+$("setLoad").onclick = loadSettings;
+$("setSave").onclick = async () => {
+  let body; try { body = JSON.parse($("setText").value); } catch (e) { $("setMsg").textContent = "That isn't valid JSON."; return; }
+  try { const j = await postJson("/api/settings", body); $("setMsg").textContent = j.note || "Saved."; loadSettings(); }
+  catch (e) { $("setMsg").textContent = "Not saved: " + e.message; }
+};
+async function loadStatus() {
+  try {
+    const s = await (await fetch("/api/status", { cache: "no-store" })).json();
+    if (s.pollMs) pollMs = s.pollMs;
+    const rows = [["Firmware", s.firmware], ["Engine profile", s.profile], ["Mode", s.mode], ["Network", s.network],
+      ["Access point", s.apSsid + " (" + s.apClients + " connected)"], ["Joined network IP", s.staIp || "—"],
+      ["Free memory", Math.round(s.freeHeap / 1024) + " KB (lowest " + Math.round(s.minFreeHeap / 1024) + " KB)"],
+      ["Uptime", Math.round(s.uptimeMs / 60000) + " min"], ["SD logging", s.sdLoggingAvailable ? (s.sdLogging ? "on" : "off") : "not in this build"],
+      ["Settings", s.settingsFromStore ? "loaded from memory" : "defaults (" + (s.settingsNote || "none stored") + ")"]];
+    $("statusTable").innerHTML = "<table><tbody>" + rows.map(([k, v]) => `<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join("") + "</tbody></table>";
+  } catch (e) { $("statusTable").textContent = "Unit status unavailable."; }
+}
+async function setLogging(on) {
+  try { await postJson("/api/logging", { enabled: on }); $("logMsg").textContent = on ? "Logging started." : "Logging stopped."; loadStatus(); }
+  catch (e) { $("logMsg").textContent = e.message; }
+}
+$("logOn").onclick = () => setLogging(true);
+$("logOff").onclick = () => setLogging(false);
+$("layoutExport").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ omobdLayout: 1, layout, prefs }, null, 2)], { type: "application/json" }));
+  a.download = "omobd-dashboard-layout.json"; a.click();
+};
+$("layoutImportBtn").onclick = () => $("layoutFile").click();
+$("layoutFile").onchange = async (e) => {
+  try {
+    const j = JSON.parse(await e.target.files[0].text());
+    if (j.omobdLayout !== 1 || !j.layout || !Array.isArray(j.layout.pages)) throw new Error("not an OMOBD layout file");
+    layout = j.layout; Object.assign(prefs, j.prefs || {}); saveLayout(); store.set("prefs", prefs); applyPrefs(); pageIdx = 0; render();
+  } catch (err) { alert("Could not restore: " + err.message); }
+};
+function applyPrefs() {
+  document.documentElement.dataset.theme = prefs.theme;
+  $("uBoost").value = prefs.boost; $("uVac").value = prefs.vac; $("uTheme").value = prefs.theme;
+}
+["uBoost", "uVac", "uTheme"].forEach(id => $(id).onchange = () => {
+  prefs.boost = $("uBoost").value; prefs.vac = $("uVac").value; prefs.theme = $("uTheme").value;
+  store.set("prefs", prefs); applyPrefs(); render();
+});
+
+applyPrefs();
+fetch("/api/status").then(r => r.json()).then(s => { if (s.pollMs) pollMs = s.pollMs; }).catch(() => {});
+poll();
+</script>
+</body>
+</html>

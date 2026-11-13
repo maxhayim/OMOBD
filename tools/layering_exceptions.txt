@@ -189,3 +189,17 @@ storage -> sensors   # #401 -- json_config/json_registry serialize sensor/applic
 test -> (root)       # #401 -- test-mode scaffolding reads config.h.
 test -> core         # #401 -- test_mode uses core/message_api and logging.
 test -> inputs       # #401 -- test mode substitutes Input read functions.
+
+# --- OMOBD (fork of preOBD for Mercedes-Benz OM diesels) --------------------
+# src/omobd/ is an outer, composition-level module like main.cpp: it only
+# READS inputs[], rules and registries to serve the Wi-Fi dashboard. Its pure
+# logic (omobd_derived/settings/live) includes nothing outside src/omobd/.
+# Only omobd_web.cpp (the ESP32 glue) has these edges.
+(root) -> omobd      # OMOBD: main.cpp calls omobdWebInit()/omobdWebUpdate()
+omobd -> (root)      # OMOBD: config.h (MAX_INPUTS), version.h (firmware string)
+omobd -> core        # OMOBD: system mode, watchdog feed while streaming, messages
+omobd -> inputs      # OMOBD: read-only view of inputs[] for /api/live
+omobd -> outputs     # OMOBD: SD_Log runtime toggle via setOutputEnabled()
+omobd -> rules       # OMOBD: per-input annunciator severity for tiles
+omobd -> sensors     # OMOBD: sensor range, application and unit names
+omobd -> storage     # OMOBD: dumpConfigToJSON() for the config backup download

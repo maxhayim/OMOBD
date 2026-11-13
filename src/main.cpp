@@ -59,6 +59,13 @@
 #include "outputs/ble/live_value_broadcaster.h"
 #include "comms/elm327_framed.h"
 #include "outputs/display/lcd_layout.h"  // LCD input selection (#480)
+#include "omobd/omobd_web.h"              // OMOBD Wi-Fi dashboard (no-op unless OMOBD_WEB_DASHBOARD)
+
+// Product name used for the Bluetooth device name and banner. Upstream builds
+// stay "preOBD"; the OMOBD board sets PRODUCT_NAME in its board.h.
+#ifndef PRODUCT_NAME
+#define PRODUCT_NAME "preOBD"
+#endif
 #ifdef ESP32
 // Include appropriate Bluetooth transport for ESP32 variant
 #if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3)
@@ -122,9 +129,9 @@ SerialTransport hwSerial8(&HW_SERIAL8, "SERIAL8", 115200);
 #ifdef ESP32
 // ESP32 Bluetooth transport (Classic or BLE depending on chip)
 #if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3)
-    BLETransportESP32 btESP32("preOBD");
+    BLETransportESP32 btESP32(PRODUCT_NAME);
 #else
-    BluetoothTransportESP32 btESP32("preOBD");
+    BluetoothTransportESP32 btESP32(PRODUCT_NAME);
 #endif
 #endif
 
@@ -515,6 +522,9 @@ void setup() {
     msg.control.println(F("/_/                              "));
     msg.control.println();    
     msg.control.println(F("Open Vehicle Monitoring ==============="));
+#if defined(OMOBD_WEB_DASHBOARD) && OMOBD_WEB_DASHBOARD
+    msg.control.println(F("OMOBD - Mercedes-Benz OM diesel monitoring, built on preOBD"));
+#endif
     msg.control.print(F("Firmware version "));
     msg.control.println(firmwareVersionString());
     msg.control.println();
@@ -691,6 +701,10 @@ void setup() {
 
     initSerialConfig();
 
+    // OMOBD web dashboard: after inputs and rules are loaded (it reads both).
+    omobdWebInit();
+    watchdogReset();
+
 #if INCLUDE_RULES_ENGINE
     // Register action target pins LAST — after every hardware-fixed pin (system,
     // bus, RGB, serial) is in the registry — so a stray action target is flagged
@@ -791,6 +805,7 @@ void loop() {
         updateDisplay(now);
     }
     updateOutputs();     // Housekeeping: drain buffers, handle RX
+    omobdWebUpdate(now); // OMOBD dashboard + calculated values (no-op on other boards)
 
     // Update RGB LED effects (non-blocking)
     #if INCLUDE_LED
